@@ -1,0 +1,2105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Aviary">
+<meta name="application-name" content="Aviary">
+<meta name="theme-color" content="#0c0e14">
+<meta name="description" content="Bird Farm Management System">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aviary</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  :root {
+    --bg: #0c0e14; --surface: #13161f; --surface2: #1c2030;
+    --border: #252a38; --border2: #2e3448;
+    --text: #e2e6f0; --muted: #6b7280; --subtle: #9ca3af;
+    --green: #34d399; --green-bg: #064e3b; --green-border: #065f46;
+    --red: #f87171; --red-bg: #450a0a; --red-border: #7f1d1d;
+    --blue: #60a5fa; --blue-bg: #1e3a5f; --blue-border: #1d4ed8;
+    --amber: #fbbf24; --purple: #a78bfa;
+    --radius: 10px; --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
+
+  /* HEADER */
+  .header { background: var(--surface); padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  .header-icon { width: 36px; height: 36px; background: linear-gradient(135deg, #065f46, #1d4ed8); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .header h1 { font-size: 17px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+  .header p { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+  /* TABS */
+  .tabs { display: flex; overflow-x: auto; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 16px; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { display: flex; align-items: center; gap: 6px; padding: 12px 14px; border: none; background: none; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; font-size: 12px; white-space: nowrap; font-weight: 500; font-family: 'Inter', sans-serif; transition: color 0.15s; }
+  .tab svg { width: 14px; height: 14px; }
+  .tab.active { color: var(--green); border-bottom-color: var(--green); font-weight: 600; }
+  .tab:hover:not(.active) { color: var(--subtle); }
+
+  /* CONTENT */
+  .content { padding: 20px 16px; max-width: 1100px; margin: 0 auto; }
+  .page { display: none; }
+  .page.active { display: block; }
+  .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .page-header h2 { font-size: 17px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+
+  /* BUTTONS */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: none; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600; font-size: 12px; font-family: 'Inter', sans-serif; transition: opacity 0.15s; }
+  .btn svg { width: 13px; height: 13px; }
+  .btn:hover { opacity: 0.85; }
+  .btn-primary { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .btn-ghost { background: var(--surface2); color: var(--subtle); border: 1px solid var(--border2); }
+  .btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+  .btn-sm { padding: 4px 10px; font-size: 11px; }
+  /* Keep old class names working */
+  .btn-green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .btn-gray { background: var(--surface2); color: var(--subtle); border: 1px solid var(--border2); }
+  .btn-red { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .stat-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+  .stat-icon svg { width: 16px; height: 16px; }
+  .stat-value { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 3px; font-weight: 500; }
+
+  /* CARDS */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); gap: 14px; }
+  .card-title { font-weight: 700; font-size: 14px; margin-bottom: 10px; letter-spacing: -0.2px; }
+  .card-info { font-size: 12px; color: var(--muted); line-height: 2; }
+  .card-info span { color: var(--text); }
+  .card-info .green { color: var(--green); font-weight: 500; }
+  .card-info .yellow { color: var(--amber); font-weight: 500; }
+  .card-actions { display: flex; gap: 8px; margin-top: 12px; }
+  .card-actions .btn { flex: 1; justify-content: center; }
+
+  /* BADGES */
+  .badge { padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-male { background: #1e3a5f; color: var(--blue); border: 1px solid #1d4ed8; }
+  .badge-female { background: #3b0764; color: #c4b5fd; border: 1px solid #6d28d9; }
+  .badge-active { background: #451a03; color: #fcd34d; border: 1px solid #92400e; }
+  .badge-complete { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .badge-failed { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; min-width: 600px; }
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow-x: auto; }
+  th { padding: 10px 14px; text-align: left; font-size: 11px; color: var(--muted); background: var(--surface2); font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
+  td { padding: 11px 14px; font-size: 12px; border-top: 1px solid var(--border); color: var(--text); }
+  td.green { color: var(--green); font-weight: 600; }
+  td.yellow { color: var(--amber); font-weight: 600; }
+  td.red { color: var(--red); font-weight: 600; }
+  tr:hover td { background: var(--surface2); }
+  .empty { padding: 36px; text-align: center; color: var(--muted); font-size: 13px; }
+
+  /* SUMMARY */
+  .summary-box { border-radius: var(--radius); padding: 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .summary-green { background: var(--green-bg); border: 1px solid var(--green-border); }
+  .summary-red { background: var(--red-bg); border: 1px solid var(--red-border); }
+  .summary-label { font-size: 13px; font-weight: 600; }
+  .summary-value { font-size: 22px; font-weight: 700; color: var(--amber); letter-spacing: -0.5px; }
+
+  /* PAIRS */
+  .pair-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .pair-birds { display: flex; gap: 10px; margin: 12px 0; }
+  .pair-bird { flex: 1; border-radius: 8px; padding: 10px; }
+  .pair-bird.male { background: #1e3a5f33; border: 1px solid #1d4ed844; }
+  .pair-bird.female { background: #3b076433; border: 1px solid #6d28d944; }
+  .pair-bird-label { font-size: 10px; margin-bottom: 4px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+  .pair-bird-name { font-weight: 600; font-size: 13px; }
+  .pair-bird-mut { font-size: 11px; color: var(--green); margin-top: 2px; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: #00000099; backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 16px; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border2); border-radius: 14px; padding: 22px; width: 100%; max-width: 460px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 60px #00000088; }
+  .modal h3 { color: var(--text); margin-bottom: 18px; font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
+  .form-group input, .form-group select { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 9px 12px; color: var(--text); font-size: 13px; font-family: 'Inter', sans-serif; }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--green); }
+  .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
+  .modal-actions .btn { flex: 1; justify-content: center; padding: 10px; }
+
+  /* PL */
+  .pl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .pl-card { border-radius: var(--radius); padding: 20px; }
+  .pl-card.profit { background: var(--green-bg); border: 1px solid var(--green-border); }
+  .pl-card.loss-card { background: var(--red-bg); border: 1px solid var(--red-border); }
+  .pl-label { font-size: 11px; margin-bottom: 8px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
+  .pl-value { font-size: 26px; font-weight: 700; letter-spacing: -1px; }
+  .cat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+
+  /* SECTION LABEL */
+  .section-label { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px; }
+</style>
+
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Aviary">
+<meta name="theme-color" content="#0c0e14">
+<meta name="description" content="Bird Farm Management App">
+<link rel="manifest" href="data:application/json,{
+  &quot;name&quot;: &quot;Aviary&quot;,
+  &quot;short_name&quot;: &quot;Aviary&quot;,
+  &quot;description&quot;: &quot;Bird Farm Manager&quot;,
+  &quot;start_url&quot;: &quot;.&quot;,
+  &quot;display&quot;: &quot;standalone&quot;,
+  &quot;background_color&quot;: &quot;#0c0e14&quot;,
+  &quot;theme_color&quot;: &quot;#0c0e14&quot;,
+  &quot;orientation&quot;: &quot;portrait&quot;,
+  &quot;icons&quot;: [{
+    &quot;src&quot;: &quot;data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230c0e14'/><text y='.9em' font-size='80' x='10'>🦜</text></svg>&quot;,
+    &quot;sizes&quot;: &quot;any&quot;,
+    &quot;type&quot;: &quot;image/svg+xml&quot;,
+    &quot;purpose&quot;: &quot;any maskable&quot;
+  }]
+}">
+<script>
+// PWA Manifest
+const manifestData = {
+  name: "Aviary",
+  short_name: "Aviary",
+  description: "Bird Farm Management System",
+  start_url: "./",
+  display: "standalone",
+  background_color: "#0c0e14",
+  theme_color: "#0c0e14",
+  orientation: "portrait-primary",
+  icons: [{
+    src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%230c0e14'/%3E%3Crect width='512' height='512' rx='80' fill='%23064e3b' opacity='0.6'/%3E%3Ctext x='256' y='360' font-size='300' text-anchor='middle'%3E%F0%9F%A6%9C%3C/text%3E%3C/svg%3E",
+    sizes: "512x512",
+    type: "image/svg+xml",
+    purpose: "any maskable"
+  }]
+};
+const blob = new Blob([JSON.stringify(manifestData)], {type: 'application/manifest+json'});
+const manifestURL = URL.createObjectURL(blob);
+const link = document.createElement('link');
+link.rel = 'manifest';
+link.href = manifestURL;
+document.head.appendChild(link);
+</script>
+</head>
+<body>
+
+<div class="header" style="justify-content:space-between;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="header-icon" id="header-icon-box" style="cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;" onclick="openFarmSettings()">
+      🦜
+    </div>
+    <div>
+      <h1 id="farm-name-display">Aviary</h1>
+      <p id="farm-sub-display">Bird Farm Management System</p>
+    </div>
+  </div>
+  
+  <button id="pwa-install-btn" onclick="installPWA()" style="display:inline-flex;background:var(--green-bg);border:1px solid var(--green-border);border-radius:6px;padding:6px 14px;color:var(--green);font-size:11px;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;align-items:center;gap:5px;">
+    ⬇ Install App
+  </button>
+  <button onclick="openFarmSettings()"  style="background:none;border:none;cursor:pointer;color:var(--muted);padding:6px;border-radius:8px;" title="Farm Settings">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  </button>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('dashboard')">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    Dashboard
+  </button>
+  <button class="tab" onclick="showTab('birds')">
+    Birds
+  </button>
+  <button class="tab" onclick="showTab('pairs')">
+    Pairs
+  </button>
+  <button class="tab" onclick="showTab('eggs')">
+    Eggs & Chicks
+  </button>
+  <button class="tab" onclick="showTab('sales')">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    Sales
+  </button>
+  <button class="tab" onclick="showTab('expenses')">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+    Expenses
+  </button>
+  <button class="tab" onclick="showTab('pl')">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Profit / Loss
+  </button>
+</div>
+
+<div class="content">
+
+  <!-- DASHBOARD -->
+  <div id="page-dashboard" class="page active">
+    <div class="page-header"><h2>Farm Overview</h2></div>
+    <div class="stats-grid" id="stats-grid"></div>
+    <div id="dash-egg-report"></div>
+    <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:10px;">Recently Added Birds</div>
+    <div id="recent-birds-list"></div>
+  </div>
+
+  <!-- BIRDS -->
+  <div id="page-birds" class="page">
+    <div class="page-header">
+      <h2>Birds Registry</h2>
+      <button class="btn btn-green" onclick="openModal('bird')"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Bird</button>
+    </div>
+    <div class="cards-grid" id="birds-list"></div>
+  </div>
+
+  <!-- PAIRS -->
+  <div id="page-pairs" class="page">
+    <div class="page-header">
+      <h2>Breeding Pairs</h2>
+      <button class="btn btn-green" onclick="openModal('pair')"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Pair</button>
+    </div>
+    <div class="cards-grid" id="pairs-list"></div>
+  </div>
+
+  <!-- EGGS -->
+  <div id="page-eggs" class="page">
+    <div class="page-header">
+      <h2>Clutches &amp; Eggs</h2>
+      <button class="btn btn-green" onclick="openModal('clutch')"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Clutch</button>
+    </div>
+    <div id="eggs-list"></div>
+  </div>
+
+  <!-- SALES -->
+  <div id="page-sales" class="page">
+    <div class="page-header">
+      <h2>Sales Record</h2>
+      <button class="btn btn-green" onclick="openModal('sale')"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Sale</button>
+    </div>
+    <div class="summary-box summary-green">
+      <span class="summary-label" style="color:var(--green)">Total Revenue</span>
+      <span class="summary-value" id="total-revenue">₨ 0</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Bird/Item</th><th>Mutation</th><th>Date</th><th>Buyer</th><th>Price</th><th>Notes</th><th>Actions</th></tr></thead>
+        <tbody id="sales-list"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- EXPENSES -->
+  <div id="page-expenses" class="page">
+    <div class="page-header">
+      <h2>Expenses</h2>
+      <button class="btn btn-green" onclick="openModal('expense')"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Expense</button>
+    </div>
+    <div class="summary-box summary-red">
+      <span class="summary-label" style="color:var(--red)">Total Expenses</span>
+      <span class="summary-value" id="total-expenses">₨ 0</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Category</th><th>Description</th><th>Date</th><th>Amount</th><th>Actions</th></tr></thead>
+        <tbody id="expenses-list"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PROFIT/LOSS -->
+  <div id="page-pl" class="page">
+    <div class="page-header"><h2>Profit / Loss Report</h2></div>
+    <div class="pl-grid" id="pl-cards"></div>
+    <h3 style="color:#a0aec0;margin-bottom:10px;font-size:14px">Expense by Category</h3>
+    <div class="card" id="cat-breakdown"></div>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+let db = { birds: [], pairs: [], clutches: [], sales: [], expenses: [] };
+let editId = null;
+let editType = null;
+
+// SVG icon constants
+const IC = {
+  ring: '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>',
+  dna: '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 15c6.667-6 13.333 0 20-6"/><path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993"/><path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993"/><path d="m17 6-2.5-2.5"/><path d="m14 8-1-1"/><path d="m7 18 2.5 2.5"/><path d="m3.5 14.5.5.5"/><path d="m20 9 .5.5"/><path d="m6.5 12.5 1 1"/><path d="m16.5 10.5 1 1"/><path d="m10 16 1.5 1.5"/></svg>',
+  user: '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  cal: '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  pkr: '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+  note: '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+  cage: '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="9" x2="9" y2="21"/><line x1="15" y1="9" x2="15" y2="21"/></svg>',
+  tag: '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
+  sold: '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  bird: '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg>',
+  edit: '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+  del: '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>',
+  foster: '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+};
+
+
+function loadDB() {
+  try { const d = localStorage.getItem('birdFarmDB'); if(d) db = JSON.parse(d); } catch(e){}
+}
+function saveDB() {
+  try { localStorage.setItem('birdFarmDB', JSON.stringify(db)); } catch(e){}
+}
+
+loadDB();
+// Load farm settings
+(function loadFarmSettings() {
+  const name = db.farmName || 'Aviary';
+  const icon = db.farmIcon || '🦜';
+  const el = document.getElementById('farm-name-display');
+  const ic = document.getElementById('header-icon-box');
+  const sub = document.getElementById('farm-sub-display');
+  if(el) el.textContent = name;
+  if(ic) ic.textContent = icon;
+  if(sub) sub.textContent = db.farmSub || 'Bird Farm Management System';
+  document.title = name;
+})();
+// Always run migration — fixes old data from previous versions
+(function migrate() {
+  if(!db.eggs) db.eggs = [];
+  // If db.mutations doesn't exist OR is empty, build it fresh
+  if(!db.mutations || db.mutations.length === 0) {
+    const defaults = ['Normal','Pineapple','Turquoise','Cinnamon','Yellow-sided','Suncheek','Creamino','Lutino','Violet','Mint'];
+    const custom = db.customMutations || [];
+    // Merge defaults + any custom ones not already in defaults
+    const extra = custom.filter(c => !defaults.includes(c));
+    db.mutations = [...defaults, ...extra];
+    saveDB();
+  }
+})();
+
+function pkr(n) { return '₨ ' + Number(n||0).toLocaleString(); }
+function fdate(d) { if(!d) return '-'; return new Date(d).toLocaleDateString('en-PK',{day:'2-digit',month:'short',year:'numeric'}); }
+function getPairName(pairId) {
+  const p = db.pairs.find(x => x.id == pairId);
+  if(!p) return '-';
+  const m = db.birds.find(b => b.id == p.maleId);
+  const f = db.birds.find(b => b.id == p.femaleId);
+  return `${m?m.name:'?'} × ${f?f.name:'?'}`;
+}
+
+function showTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+  event.target.classList.add('active');
+  renderAll();
+}
+
+
+function showPairHistory(pairId) {
+  const pair = db.pairs.find(p => p.id == pairId);
+  if(!pair) return;
+  const male = db.birds.find(b => b.id == pair.maleId);
+  const female = db.birds.find(b => b.id == pair.femaleId);
+  const mName = male ? male.name + (male.ringNumber?' ['+male.ringNumber+']':'') : '?';
+  const fName = female ? female.name + (female.ringNumber?' ['+female.ringNumber+']':'') : '?';
+
+  // All clutches of this pair
+  const clutches = db.clutches.filter(c => c.id == pairId || c.pairId == pairId);
+  const allEggs = (db.eggs||[]).filter(e => clutches.some(c => c.id == e.clutchId));
+
+  // Stats
+  const totalEggs = allEggs.length;
+  const hatched = allEggs.filter(e => e.status === 'Hatched');
+  const soldEggs = allEggs.filter(e => e.status === 'Sold');
+  const infertile = allEggs.filter(e => e.status === 'Infertile');
+  const died = allEggs.filter(e => e.status === 'Died in Shell');
+  const totalSoldRev = soldEggs.reduce((a,e) => a+Number(e.soldPrice||0), 0);
+
+  // Mutation breakdown of chicks
+  const mutMap = {};
+  hatched.forEach(e => {
+    const m = e.mutation || 'Unknown';
+    mutMap[m] = (mutMap[m]||0) + 1;
+  });
+
+  // Build mutation rows
+  const mutRows = Object.entries(mutMap).sort((a,b) => b[1]-a[1]).map(([m, count]) =>
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--surface2);border-radius:8px;margin-bottom:6px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-weight:600;font-size:13px;">${m}</span>
+      </div>
+      <span style="background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);padding:2px 10px;border-radius:20px;font-size:12px;font-weight:700;">${count} chick${count>1?'s':''}</span>
+    </div>`
+  ).join('');
+
+  // Sold eggs list
+  const soldRows = soldEggs.map(e => {
+    const clutch = clutches.find(c => c.id == e.clutchId);
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--surface2);border-radius:8px;margin-bottom:6px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:#c4b5fd;margin:0 auto 4px;"></div>
+        <div>
+          <div style="font-size:12px;font-weight:600;">Egg #${e.eggNum}</div>
+          ${e.soldDate?`<div style="font-size:11px;color:var(--muted);">${fdate(e.soldDate)}${e.soldTo?' · '+e.soldTo:''}</div>`:''}
+        </div>
+      </div>
+      <span style="color:var(--amber);font-weight:700;font-size:13px;">${pkr(e.soldPrice)}</span>
+    </div>`;
+  }).join('');
+
+  const mc = document.getElementById('modal-content');
+  mc.innerHTML = `
+    <h3>Pair History</h3>
+    <div style="background:var(--surface2);border-radius:10px;padding:12px;margin-bottom:16px;">
+      <div style="font-weight:700;font-size:14px;">${mName}</div>
+      <div style="font-size:12px;color:var(--muted);margin:4px 0;">×</div>
+      <div style="font-weight:700;font-size:14px;">${fName}</div>
+      <div style="font-size:11px;color:var(--green);margin-top:6px;font-weight:500;">${male?.mutation||'?'} × ${female?.mutation||'?'}</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">
+      <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:20px;font-weight:800;color:var(--text);">${totalEggs}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px;">Total Eggs</div>
+      </div>
+      <div style="background:var(--green-bg);border:1px solid var(--green-border);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:20px;font-weight:800;color:var(--green);">${hatched.length}</div>
+        <div style="font-size:10px;color:var(--green);opacity:0.8;margin-top:2px;">Hatched 🐣</div>
+      </div>
+      <div style="background:#1e1b4b;border:1px solid #4c1d95;border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:20px;font-weight:800;color:#c4b5fd;">${soldEggs.length}</div>
+        <div style="font-size:10px;color:#c4b5fd;opacity:0.8;margin-top:2px;">Eggs Sold 🥚</div>
+      </div>
+    </div>
+
+    ${infertile.length||died.length ? `<div style="display:flex;gap:8px;margin-bottom:16px;">
+      ${infertile.length?`<div style="flex:1;background:var(--surface2);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:16px;font-weight:700;color:var(--muted);">${infertile.length}</div><div style="font-size:10px;color:var(--muted);">Infertile</div></div>`:''}
+      ${died.length?`<div style="flex:1;background:var(--red-bg);border:1px solid var(--red-border);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:16px;font-weight:700;color:var(--red);">${died.length}</div><div style="font-size:10px;color:var(--red);">Died in Shell</div></div>`:''}
+    </div>` : ''}
+
+    ${hatched.length ? `<div style="margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;">Chicks by Mutation</div>
+      ${mutRows}
+    </div>` : ''}
+
+    ${soldEggs.length ? `<div style="margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;">Eggs Sold</div>
+        <div style="font-size:12px;font-weight:700;color:var(--amber);">Total: ${pkr(totalSoldRev)}</div>
+      </div>
+      ${soldRows}
+    </div>` : ''}
+
+    ${!totalEggs ? '<div style="text-align:center;padding:20px;color:var(--muted);">No eggs recorded for this pair yet</div>' : ''}
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+
+function openFarmSettings() {
+  const name = db.farmName || 'Aviary';
+  const icon = db.farmIcon || '🦜';
+  const sub  = db.farmSub  || 'Bird Farm Management System';
+
+  const ICONS = ['🦜','🐦','🐧','🦢','🦅','🦆','🦉','🦚','🦩','🕊️','🐓','🦃','🌿','🏡','⭐'];
+
+  const iconGrid = ICONS.map(ic =>
+    `<span onclick="selectFarmIcon('${ic}')" id="ficon-${ic}" style="font-size:22px;cursor:pointer;padding:8px;border-radius:8px;border:2px solid ${ic===icon?'var(--green)':'transparent'};display:inline-flex;align-items:center;justify-content:center;transition:border 0.15s;">${ic}</span>`
+  ).join('');
+
+  const mc = document.getElementById('modal-content');
+  mc.innerHTML = `
+    <h3>Farm Settings</h3>
+    <div class="form-group">
+      <label>Farm Name</label>
+      <input type="text" id="fs-name" value="${name}" placeholder="e.g. Raja Birds Farm" maxlength="40">
+    </div>
+    <div class="form-group">
+      <label>Tagline (optional)</label>
+      <input type="text" id="fs-sub" value="${sub}" placeholder="e.g. Premium Mutations Since 2020" maxlength="60">
+    </div>
+    <div class="form-group">
+      <label>Farm Icon</label>
+      <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px;display:flex;flex-wrap:wrap;gap:4px;" id="ficon-grid">
+        ${iconGrid}
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveFarmSettings()">Save</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function selectFarmIcon(ic) {
+  // Highlight selected
+  document.querySelectorAll('[id^="ficon-"]').forEach(el => el.style.border = '2px solid transparent');
+  const sel = document.getElementById('ficon-'+ic);
+  if(sel) sel.style.border = '2px solid var(--green)';
+  window._selectedFarmIcon = ic;
+}
+
+function saveFarmSettings() {
+  const name = document.getElementById('fs-name').value.trim() || 'Aviary';
+  const sub  = document.getElementById('fs-sub').value.trim() || 'Bird Farm Management System';
+  const icon = window._selectedFarmIcon || db.farmIcon || '🦜';
+  db.farmName = name;
+  db.farmSub  = sub;
+  db.farmIcon = icon;
+  saveDB();
+  document.getElementById('farm-name-display').textContent = name;
+  document.getElementById('farm-sub-display').textContent = sub;
+  document.getElementById('header-icon-box').textContent = icon;
+  document.title = name;
+  closeModal();
+}
+
+function renderAll() {
+  renderDashboard();
+  renderBirds();
+  renderPairs();
+  renderEggs();
+  renderSales();
+  renderExpenses();
+  renderPL();
+}
+
+function renderDashboard() {
+  const allEggs = db.eggs || [];
+  const totalBirds  = db.birds.length;
+  const totalExpired = db.birds.filter(b => b.expired === true || b.expired === 'true').length;
+  const totalPairs  = db.pairs.length;
+  const totalChicks = allEggs.filter(e=>e.status==='Hatched').length;
+  const totalSoldEggs = allEggs.filter(e=>e.status==='Sold').length;
+  const rev = db.sales.reduce((a,s)=>a+Number(s.price||0),0)
+    + allEggs.filter(e=>e.status==='Sold').reduce((a,e)=>a+Number(e.soldPrice||0),0)
+    + db.birds.filter(b=>(b.sold===true||b.sold==='true')&&b.soldPrice).reduce((a,b)=>a+Number(b.soldPrice||0),0);
+  const exp = db.expenses.reduce((a,e)=>a+Number(e.amount||0),0)
+    + db.birds.filter(b=>b.buyPrice&&Number(b.buyPrice)>0).reduce((a,b)=>a+Number(b.buyPrice||0),0);
+  const profit = rev - exp;
+
+  // Egg stats
+  const fertile     = allEggs.filter(e=>e.status==='Fertile').length;
+  const pending     = allEggs.filter(e=>e.status==='Pending').length;
+  const infertile   = allEggs.filter(e=>e.status==='Infertile').length;
+  const diedShell   = allEggs.filter(e=>e.status==='Died in Shell').length;
+  const fosterEggs  = allEggs.filter(e=>e.fosterName && e.fosterName.trim()).length;
+  const expiredChicks = db.birds.filter(b=>b.expired===true||b.expired==='true').length;
+
+  // Near hatch = pending/fertile eggs laid 16+ days ago
+  const nearHatch = allEggs.filter(e=>{
+    if(e.status!=='Pending'&&e.status!=='Fertile') return false;
+    if(!e.date) return false;
+    const days = Math.floor((Date.now()-new Date(e.date).getTime())/86400000);
+    return days >= 16;
+  }).length;
+
+  // Chicks being tracked (bought as chick, not yet adult)
+  const chicksTracked = db.birds.filter(b=>b.boughtAsChick===true||b.boughtAsChick==='true').length;
+
+  const stats = [
+    {label:'Total Birds',    value:totalBirds,    color:'#34d399', icon:'🦜'},
+    {label:'Pairs',          value:totalPairs,    color:'#c4b5fd', icon:'❤️'},
+    {label:'Hatched Chicks', value:totalChicks,   color:'#fbbf24', icon:'🐣'},
+    {label:'Eggs Sold',      value:totalSoldEggs, color:'#a78bfa', icon:'🥚'},
+    {label:'Expired Birds',  value:totalExpired,  color:'#f87171', icon:'☠️'},
+    {label:'Revenue',        value:pkr(rev),      color:'#34d399', icon:'💰'},
+    {label:'Expenses',       value:pkr(exp),      color:'#f87171', icon:'💸'},
+    {label:profit>=0?'Net Profit':'Net Loss', value:pkr(profit), color:profit>=0?'#34d399':'#f87171', icon:profit>=0?'📈':'📉'},
+  ];
+
+  document.getElementById('stats-grid').innerHTML = stats.map(s =>
+    `<div class="stat-card">
+      <div style="font-size:22px;margin-bottom:8px;">${s.icon}</div>
+      <div class="stat-value" style="color:${s.color}">${s.value}</div>
+      <div class="stat-label">${s.label}</div>
+    </div>`
+  ).join('');
+
+  // ── Egg Report ────────────────────────────────────────────────────────────
+  const eggReport = [
+    {label:'Pending',        val:pending,      icon:'⏳', color:'var(--amber)',  bg:'#1c1a07',  border:'#92400e'},
+    {label:'Fertile',        val:fertile,      icon:'🟢', color:'#22c55e',       bg:'#052e16',  border:'#166534'},
+    {label:'Near Hatch',     val:nearHatch,    icon:'🟡', color:'#facc15',       bg:'#422006',  border:'#a16207'},
+    {label:'Foster',         val:fosterEggs,   icon:'🟤', color:'#d97706',       bg:'#1c0a00',  border:'#78350f'},
+    {label:'Infertile',      val:infertile,    icon:'⚪', color:'var(--muted)',  bg:'var(--surface2)', border:'var(--border2)'},
+    {label:'Died in Shell',  val:diedShell,    icon:'🔴', color:'var(--red)',    bg:'var(--red-bg)',   border:'var(--red-border)'},
+
+  ].filter(r => r.val > 0);
+
+  const eggReportHtml = eggReport.length
+    ? eggReport.map(r=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:${r.bg};border:1px solid ${r.border};border-radius:8px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:14px;">${r.icon}</span>
+            <span style="font-size:12px;font-weight:500;color:var(--text);">${r.label}</span>
+          </div>
+          <span style="font-size:16px;font-weight:800;color:${r.color};">${r.val}</span>
+        </div>`).join('')
+    : '<div style="padding:12px;color:var(--muted);text-align:center;font-size:13px;">No active eggs</div>';
+
+  // ── Chick Tracking ────────────────────────────────────────────────────────
+  const chickTracking = db.birds.filter(b=>b.boughtAsChick===true||b.boughtAsChick==='true');
+  const chickTrackHtml = chickTracking.length ? chickTracking.map(b=>{
+    const days = b.dob ? Math.floor((Date.now()-new Date(b.dob).getTime())/86400000) : null;
+    const weeks = days !== null ? Math.floor(days/7) : null;
+    const ageLabel = weeks !== null ? (weeks < 8 ? weeks+'w old' : Math.floor(weeks/4.33)+'m old') : '—';
+    const barPct = weeks !== null ? Math.min(Math.round((weeks/26)*100),100) : 0;
+    const barColor = weeks >= 26 ? 'var(--green)' : weeks >= 16 ? 'var(--amber)' : 'var(--blue)';
+    const statusLabel = weeks >= 26 ? 'Adult ✓' : weeks >= 16 ? 'Maturing' : 'Growing';
+    return `<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-weight:600;font-size:13px;">${b.name}</span>
+          ${b.mutation?`<span style="font-size:11px;color:var(--green);">${b.mutation}</span>`:''}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:11px;color:var(--muted);">${ageLabel}</span>
+          <span style="font-size:11px;font-weight:600;color:${barColor};">${statusLabel}</span>
+        </div>
+      </div>
+      <div style="background:var(--border);border-radius:4px;height:3px;">
+        <div style="width:${barPct}%;height:100%;background:${barColor};border-radius:4px;transition:width 0.3s;"></div>
+      </div>
+    </div>`;
+  }).join('') : '';
+
+  // ── Expired chicks ────────────────────────────────────────────────────────
+  const expiredHtml = expiredChicks > 0
+    ? `<div style="background:var(--red-bg);border:1px solid var(--red-border);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">
+        <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:14px;">🔴</span><span style="font-size:12px;font-weight:500;">Expired Chicks</span></div>
+        <span style="font-size:16px;font-weight:800;color:var(--red);">${expiredChicks}</span>
+      </div>` : '';
+
+  // ── Recently Added Birds ──────────────────────────────────────────────────
+  const recentBirds = db.birds.slice(-6).reverse();
+  const rbEl = document.getElementById('recent-birds-list');
+  if(!rbEl) return;
+  if(!recentBirds.length) {
+    rbEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">No birds added yet — click Add Bird to get started</div>';
+  } else {
+    rbEl.innerHTML = recentBirds.map(b => {
+      const isMale  = b.gender === 'Male';
+      const isChick = b.boughtAsChick === true || b.boughtAsChick === 'true';
+      const gColor  = isMale ? 'var(--blue)' : '#f9a8d4';
+      const gBg     = isMale ? '#1e3a5f' : '#3b0764';
+      const gBorder = isMale ? '#1d4ed8' : '#7c3aed';
+
+      let ageTag = '';
+      if(isChick && b.dob) {
+        const days  = Math.floor((Date.now() - new Date(b.dob).getTime()) / 86400000);
+        const weeks = Math.floor(days / 7);
+        const label = weeks < 1 ? days+'d' : weeks < 8 ? weeks+'w' : Math.floor(weeks/4.33)+'m';
+        const col   = weeks >= 26 ? 'var(--green)' : weeks >= 16 ? 'var(--amber)' : 'var(--blue)';
+        ageTag = `<span style="font-size:11px;color:${col};font-weight:600;">${label}</span>`;
+      }
+
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:7px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:32px;height:32px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">🦜</div>
+          <div>
+            <div style="font-weight:600;font-size:13px;">${b.name}${b.ringNumber?` <span style="font-family:monospace;font-size:11px;color:var(--muted);">[${b.ringNumber}]</span>`:''}</div>
+            <div style="font-size:11px;color:var(--green);margin-top:1px;">${b.mutation||'—'}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          ${ageTag}
+          <span style="background:${gBg};color:${gColor};border:1px solid ${gBorder};padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;">${b.gender||'—'}</span>
+          <span style="font-size:11px;color:var(--muted);">${fdate(b.dob)||''}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Inject egg report + chick tracking into dashboard ────────────────────
+  const reportEl = document.getElementById('dash-egg-report');
+  if(reportEl) {
+    reportEl.innerHTML = `
+      <div style="margin-bottom:20px;">
+        <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:10px;">Egg Status</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;">
+          ${eggReportHtml}
+        </div>
+        ${expiredHtml ? '<div style="margin-top:8px;">'+expiredHtml+'</div>' : ''}
+      </div>
+      ${chickTracking.length ? `<div style="margin-bottom:20px;">
+        <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:10px;">Chick Growth</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">${chickTrackHtml}</div>
+      </div>` : ''}`;
+  }
+}
+
+function renderBirds() {
+  const el = document.getElementById('birds-list');
+  const visibleBirds = db.birds.filter(b => !(b.sold === true || b.sold === 'true'));
+  if(!visibleBirds.length) {
+    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--muted)"><div style="font-size:14px;font-weight:600;margin-bottom:4px;">No birds yet</div><div style="font-size:12px;">Add Bird se shuru karo</div></div>';
+    return;
+  }
+  el.innerHTML = visibleBirds.map(b => {
+    const isSold    = b.sold === true || b.sold === 'true';
+    const isChick   = b.boughtAsChick === true || b.boughtAsChick === 'true';
+    const isExpired = b.expired === true || b.expired === 'true';
+    const isMale    = b.gender === 'Male';
+    const gColor    = isMale ? 'var(--blue)' : '#f9a8d4';
+    const gBg       = isMale ? '#1e3a5f' : '#3b0764';
+    const gBorder   = isMale ? '#1d4ed8' : '#7c3aed';
+
+    // Age calc for chicks
+    let ageRow = '';
+    if(isChick && b.dob) {
+      const days  = Math.floor((Date.now() - new Date(b.dob).getTime()) / 86400000);
+      const weeks = Math.floor(days / 7);
+      const label = weeks < 1 ? days + ' days'
+                  : weeks < 8 ? weeks + ' weeks'
+                  : Math.floor(weeks / 4.33) + ' months';
+      const barPct   = Math.min(Math.round((weeks / 26) * 100), 100);
+      const barColor = weeks >= 26 ? 'var(--green)' : weeks >= 16 ? 'var(--amber)' : 'var(--blue)';
+      const status   = weeks >= 26 ? 'Adult ✓' : weeks >= 16 ? 'Maturing' : 'Growing';
+      ageRow = `<div style="margin-top:10px;background:var(--bg);border-radius:8px;padding:8px 10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+          <span style="font-size:11px;color:var(--muted);">Age</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:12px;font-weight:700;color:${barColor};">${label}</span>
+            <span style="font-size:10px;color:${barColor};background:${gBg};padding:1px 7px;border-radius:20px;">${status}</span>
+          </div>
+        </div>
+        <div style="background:var(--border2);border-radius:4px;height:4px;">
+          <div style="width:${barPct}%;height:100%;background:${barColor};border-radius:4px;"></div>
+        </div>
+      </div>`;
+    }
+
+    // Status badges
+    const badges = [
+      isSold    ? `<span class="badge" style="background:#2e1065;color:#c4b5fd;border:1px solid #7c3aed;">Sold</span>` : '',
+      isExpired ? `<span class="badge" style="background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);">Expired</span>` : '',
+      isChick   ? `<span class="badge" style="background:#1e3a5f;color:var(--blue);border:1px solid #1d4ed8;">Chick</span>` : '',
+      `<span class="badge" style="background:${gBg};color:${gColor};border:1px solid ${gBorder};">${b.gender||'—'}</span>`,
+    ].filter(Boolean).join('');
+
+    return `<div class="card" style="opacity:${isExpired?'0.65':'1'};border-color:${isSold?'#6d28d9':isExpired?'var(--red-border)':''};">
+      <!-- Header -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+        <div>
+          <div style="font-weight:700;font-size:15px;letter-spacing:-0.3px;">${b.name}</div>
+          ${b.ringNumber ? `<div style="font-size:11px;color:var(--muted);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">${b.ringNumber}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;">${badges}</div>
+      </div>
+
+      <!-- Info grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 0;font-size:12px;margin-bottom:12px;">
+        <div style="color:var(--muted);">Mutation</div>
+        <div style="color:var(--green);font-weight:600;text-align:right;">${b.mutation||'—'}</div>
+
+        <div style="color:var(--muted);">Breeder</div>
+        <div style="text-align:right;">${b.breederName||'—'}</div>
+
+        <div style="color:var(--muted);">Arrival</div>
+        <div style="text-align:right;">${fdate(b.dob)||'—'}</div>
+
+        <div style="color:var(--muted);">Buy Price</div>
+        <div style="color:var(--amber);font-weight:600;text-align:right;">${b.buyPrice ? pkr(b.buyPrice) : '—'}</div>
+
+        ${isSold ? `<div style="color:var(--muted);">Sold For</div>
+        <div style="color:#c4b5fd;font-weight:600;text-align:right;">${pkr(b.soldPrice)}</div>` : ''}
+
+        ${b.notes ? `<div style="color:var(--muted);grid-column:1/-1;margin-top:4px;font-size:11px;">${b.notes}</div>` : ''}
+      </div>
+
+      ${ageRow}
+
+      <!-- Actions -->
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button class="btn btn-ghost btn-sm" style="flex:1;justify-content:center;" onclick="openModal('bird',${b.id})">${IC.edit} Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteItem('birds',${b.id})">${IC.del}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderPairs() {
+  const el = document.getElementById('pairs-list');
+  if(!db.pairs.length) {
+    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--muted)"><div style="font-size:14px;font-weight:600;margin-bottom:4px;">No pairs yet</div><div style="font-size:12px;">Pehle birds add karo, phir pairs banao</div></div>';
+    return;
+  }
+  // Group by mutation combo
+  const groups = {};
+  db.pairs.forEach(p => {
+    const male = db.birds.find(b => b.id == p.maleId);
+    const female = db.birds.find(b => b.id == p.femaleId);
+    const key = (male?.mutation||'Unknown') + ' × ' + (female?.mutation||'Unknown');
+    if(!groups[key]) groups[key] = [];
+    groups[key].push({p, male, female});
+  });
+
+  let html = '';
+  Object.entries(groups).forEach(([key, items]) => {
+    html += `<div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;margin:8px 0 4px;">
+      <div style="font-size:11px;font-weight:600;color:var(--green);letter-spacing:0.5px;text-transform:uppercase;">${key}</div>
+      <div style="flex:1;height:1px;background:var(--border);"></div>
+      <div style="font-size:11px;color:var(--muted);">${items.length} pair${items.length>1?'s':''}</div>
+    </div>`;
+    items.forEach(({p, male, female}) => {
+      html += `<div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="showPairHistory(${p.id})">
+            <span style="font-size:12px;font-weight:600;color:var(--green);text-decoration:underline;text-underline-offset:3px;">View History</span>
+          </div>
+          ${p.cage?`<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);">${IC.cage}<span>${p.cage}</span></div>`:''}
+        </div>
+        <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:12px;">
+          <div style="background:#1e3a5f22;border:1px solid #1d4ed844;border-radius:8px;padding:10px;">
+            <div style="font-size:10px;font-weight:600;color:var(--blue);margin-bottom:4px;letter-spacing:0.5px;">MALE</div>
+            <div style="font-weight:600;font-size:13px;">${male?male.name:'Unknown'}</div>
+            ${male?.ringNumber?`<div style="font-size:10px;color:var(--muted);font-family:monospace;">${male.ringNumber}</div>`:''}
+            <div style="font-size:11px;color:var(--green);margin-top:2px;">${male?.mutation||'—'}</div>
+          </div>
+          <div style="color:var(--muted);font-size:16px;font-weight:300;">×</div>
+          <div style="background:#3b076422;border:1px solid #7c3aed44;border-radius:8px;padding:10px;">
+            <div style="font-size:10px;font-weight:600;color:#c4b5fd;margin-bottom:4px;letter-spacing:0.5px;">FEMALE</div>
+            <div style="font-weight:600;font-size:13px;">${female?female.name:'Unknown'}</div>
+            ${female?.ringNumber?`<div style="font-size:10px;color:var(--muted);font-family:monospace;">${female.ringNumber}</div>`:''}
+            <div style="font-size:11px;color:var(--green);margin-top:2px;">${female?.mutation||'—'}</div>
+          </div>
+        </div>
+        ${p.pairedDate?`<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);margin-bottom:12px;">${IC.cal}<span>Paired: ${fdate(p.pairedDate)}</span></div>`:''}
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost btn-sm" style="flex:1;justify-content:center;" onclick="openModal('pair',${p.id})">${IC.edit} Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteItem('pairs',${p.id})">${IC.del}</button>
+        </div>
+      </div>`;
+    });
+  });
+  el.innerHTML = html;
+}
+
+function renderEggs() {
+  const el = document.getElementById('eggs-list');
+  if(!db.clutches.length) {
+    el.innerHTML = '<div style="text-align:center;padding:48px;color:var(--muted)"><div style="font-size:14px;font-weight:600;margin-bottom:4px;">No clutches yet</div><div style="font-size:12px;">Add a clutch to get started</div></div>';
+    return;
+  }
+
+  let html = '';
+  db.clutches.forEach(c => {
+    const eggs = (db.eggs||[]).filter(e => e.clutchId == c.id);
+    const pair = db.pairs.find(p => p.id == c.pairId);
+    const male = pair ? db.birds.find(b => b.id == pair.maleId) : null;
+    const female = pair ? db.birds.find(b => b.id == pair.femaleId) : null;
+    const mLabel = male ? male.name + (male.ringNumber?' ['+male.ringNumber+']':'') : '?';
+    const fLabel = female ? female.name + (female.ringNumber?' ['+female.ringNumber+']':'') : '?';
+    const mutLine = (male?.mutation||'?') + ' × ' + (female?.mutation||'?');
+
+    // Count stats
+    const totalEggs   = eggs.length;
+    const hatched     = eggs.filter(e => e.status==='Hatched').length;
+    const fertile     = eggs.filter(e => e.status==='Fertile').length;
+    const pending     = eggs.filter(e => e.status==='Pending').length;
+    const infertile   = eggs.filter(e => e.status==='Infertile').length;
+    const diedShell   = eggs.filter(e => e.status==='Died in Shell').length;
+    const sold        = eggs.filter(e => e.status==='Sold').length;
+
+    // Stat pill builder
+    const pill = (label, val, bg, color, border) => val > 0
+      ? `<span style="background:${bg};color:${color};border:1px solid ${border};padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;">${label} ${val}</span>`
+      : '';
+
+    html += `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;">
+      <div style="padding:14px 16px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">
+
+          <!-- Left: pair info + stats -->
+          <div style="cursor:pointer;flex:1;min-width:180px;" onclick="showClutchEggs(${c.id})">
+            <div style="font-weight:700;font-size:14px;letter-spacing:-0.3px;">${mLabel} × ${fLabel}</div>
+            <div style="font-size:11px;color:var(--green);margin-top:3px;font-weight:500;">${mutLine}</div>
+            ${c.startDate?`<div style="font-size:11px;color:var(--muted);margin-top:3px;">${IC.cal} ${fdate(c.startDate)}</div>`:''}
+            ${c.notes?`<div style="font-size:11px;color:var(--muted);margin-top:2px;">${IC.note} ${c.notes}</div>`:''}
+            <!-- Stats pills -->
+            <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;">
+              ${pill('Eggs', totalEggs, 'var(--surface2)', 'var(--subtle)', 'var(--border2)')}
+              ${pill('Hatched', hatched, 'var(--green-bg)', 'var(--green)', 'var(--green-border)')}
+              ${fertile||pending ? pill('Active', fertile+pending, '#451a03', 'var(--amber)', '#92400e') : ''}
+              ${pill('Infertile', infertile, 'var(--surface2)', 'var(--muted)', 'var(--border2)')}
+              ${pill('Died', diedShell, 'var(--red-bg)', 'var(--red)', 'var(--red-border)')}
+              ${pill('Sold', sold, '#1e1b4b', '#c4b5fd', '#4c1d95')}
+            </div>
+            <div style="font-size:11px;color:var(--green);margin-top:8px;opacity:0.7;">Tap to view eggs →</div>
+          </div>
+
+          <!-- Right: action buttons -->
+          <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+            <button class="btn btn-primary btn-sm" onclick="addEgg(${c.id})">+ Egg</button>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-ghost btn-sm" onclick="openModal('clutch',${c.id})">${IC.edit}</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteItem('clutches',${c.id})">${IC.del}</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function showClutchEggs(clutchId) {
+  const c = db.clutches.find(x => x.id == clutchId);
+  if(!c) return;
+  const eggs = (db.eggs||[]).filter(e => e.clutchId == clutchId);
+  const pair = db.pairs.find(p => p.id == c.pairId);
+  const male = pair ? db.birds.find(b => b.id == pair.maleId) : null;
+  const female = pair ? db.birds.find(b => b.id == pair.femaleId) : null;
+  const mLabel = male ? male.name+(male.ringNumber?' ['+male.ringNumber+']':'') : '?';
+  const fLabel = female ? female.name+(female.ringNumber?' ['+female.ringNumber+']':'') : '?';
+
+  function daysSince(dateStr) {
+    if(!dateStr) return null;
+    return Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
+  }
+
+  const STATUS_STYLE = {
+    'Hatched':       {bg:'#052e16',    border:'#14532d',          badge:'var(--green)',  badgeBg:'#14532d'},
+    'Fertile':       {bg:'#0c1a2e',    border:'var(--blue-border)',badge:'var(--blue)',   badgeBg:'var(--blue-bg)'},
+    'Infertile':     {bg:'#141414',    border:'var(--border2)',    badge:'var(--muted)',  badgeBg:'#2d2d2d'},
+    'Died in Shell': {bg:'var(--red-bg)',border:'var(--red-border)',badge:'var(--red)',   badgeBg:'var(--red-bg)'},
+    'Sold':          {bg:'#1e0a3c',    border:'#6d28d9',           badge:'#c4b5fd',      badgeBg:'#4c1d95'},
+    'Pending':       {bg:'#1c1a07',    border:'#92400e',           badge:'var(--amber)', badgeBg:'#451a03'},
+  };
+
+  let eggsHtml = '';
+  if(!eggs.length) {
+    eggsHtml = '<div style="text-align:center;padding:20px;color:var(--muted);">No eggs yet — close and tap "+ Egg" to add</div>';
+  } else {
+    eggsHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-top:14px;">';
+    eggs.forEach(egg => {
+      const st = egg.status || 'Pending';
+      const col = STATUS_STYLE[st] || STATUS_STYLE['Pending'];
+      const days = daysSince(egg.date);
+
+      eggsHtml += `<div style="background:${col.bg};border:1px solid ${col.border};border-radius:10px;padding:11px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
+          <span style="font-weight:700;font-size:13px;">Egg #${egg.eggNum}</span>
+          <span style="background:${col.badgeBg};color:${col.badge};padding:1px 7px;border-radius:20px;font-size:10px;font-weight:700;">${st}</span>
+        </div>`;
+
+      // Days counter
+      if(st==='Pending'||st==='Fertile') {
+        const urgency = days>=18?'var(--red)':days>=14?'var(--amber)':'var(--subtle)';
+        eggsHtml += `<div style="background:var(--bg);border-radius:6px;padding:5px;margin-bottom:7px;text-align:center;">
+          <span style="font-size:20px;font-weight:800;color:${urgency};">${days??'—'}</span>
+          <span style="font-size:10px;color:var(--muted);"> days</span>
+          ${days>=18?'<div style="font-size:10px;color:var(--red);font-weight:600;">Hatch near!</div>':''}
+        </div>`;
+      }
+
+      eggsHtml += `<div style="font-size:11px;color:var(--muted);line-height:1.9;">`;
+      eggsHtml += `<div>${IC.cal} <span style="color:var(--text);">${fdate(egg.date)}</span></div>`;
+      if(st==='Hatched') {
+        eggsHtml += `<div>🐣 <span style="color:var(--green);font-weight:500;">${egg.mutation||'—'}</span></div>`;
+        if(egg.hatchDate) eggsHtml += `<div>${IC.cal} <span>Hatched: ${fdate(egg.hatchDate)}</span></div>`;
+      }
+      if(st==='Sold') {
+        eggsHtml += `<div>${IC.cal} <span>${fdate(egg.soldDate)}</span></div>`;
+        eggsHtml += `<div>${IC.pkr} <span style="color:var(--amber);font-weight:600;">${pkr(egg.soldPrice)}</span></div>`;
+        if(egg.soldTo) eggsHtml += `<div>${IC.user} <span>${egg.soldTo}</span></div>`;
+      }
+      if(egg.fosterName) eggsHtml += `<div>${IC.foster} <span style="color:#fcd34d;">${egg.fosterName}</span></div>`;
+      eggsHtml += `</div>`;
+      eggsHtml += `<div style="display:flex;gap:5px;margin-top:8px;">
+        <button class="btn btn-ghost btn-sm" style="flex:1;justify-content:center;" onclick="openEggModal(${egg.id})">${IC.edit}</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteEgg(${egg.id})">${IC.del}</button>
+      </div>`;
+      eggsHtml += `</div>`;
+    });
+    eggsHtml += '</div>';
+  }
+
+  const mc = document.getElementById('modal-content');
+  mc.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+      <div>
+        <h3 style="margin-bottom:4px;">${mLabel}</h3>
+        <h3 style="margin-bottom:4px;">${fLabel}</h3>
+        <div style="font-size:11px;color:var(--green);font-weight:500;">${(male?.mutation||'?')} × ${(female?.mutation||'?')}</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="addEgg(${c.id});closeModal();">+ Egg</button>
+    </div>
+    ${eggsHtml}
+    <div class="modal-actions" style="margin-top:14px;">
+      <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function renderSales() {
+  const manualSales = db.sales.map(s => ({
+    _type:'manual', _id:s.id,
+    name:s.birdName||'—', mutation:s.mutation||'—',
+    date:s.date, buyer:s.buyer||'—', price:Number(s.price||0), notes:s.notes||''
+  }));
+  const eggSales = (db.eggs||[]).filter(e=>e.status==='Sold'&&e.soldPrice).map(e => {
+    const clutch = db.clutches.find(c=>c.id==e.clutchId);
+    const pair = clutch?db.pairs.find(p=>p.id==clutch.pairId):null;
+    const male = pair?db.birds.find(b=>b.id==pair.maleId):null;
+    const female = pair?db.birds.find(b=>b.id==pair.femaleId):null;
+    return { _type:'egg', _id:e.id,
+      name:'Egg #'+e.eggNum+' — '+(male?male.name:'?')+' × '+(female?female.name:'?'),
+      mutation:'Egg Sale', date:e.soldDate, buyer:e.soldTo||'—',
+      price:Number(e.soldPrice||0), notes:''
+    };
+  });
+  const birdSales = db.birds.filter(b=>(b.sold===true||b.sold==='true')&&b.soldPrice&&Number(b.soldPrice)>0).map(b => ({
+    _type:'bird-sale', _id:b.id,
+    name:b.name+(b.ringNumber?' ['+b.ringNumber+']':''),
+    mutation:b.mutation||'Normal', date:b.soldDate,
+    buyer: b.breederName||'—',
+    price:Number(b.soldPrice||0), notes:'Breeder Bird'
+  }));
+
+  const allSales = [...manualSales,...eggSales,...birdSales].sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+  const totalRev = allSales.reduce((a,s)=>a+s.price,0);
+  document.getElementById('total-revenue').textContent = pkr(totalRev);
+
+  const tbody = document.getElementById('sales-list');
+  if(!allSales.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty">No sales yet</td></tr>'; return; }
+
+  const typeColors = { 'manual':'var(--green)', 'egg':'var(--blue)', 'bird-sale':'#c4b5fd' };
+  const typeLabels = { 'manual':'Bird', 'egg':'Egg', 'bird-sale':'Breeder' };
+
+  tbody.innerHTML = allSales.map(s => {
+    const color = typeColors[s._type]||'var(--muted)';
+    const editBtn = s._type==='egg'
+      ? `<button class="btn btn-ghost btn-sm" onclick="openEggModal(${s._id})">${IC.edit}</button>`
+      : s._type==='bird-sale'
+        ? `<button class="btn btn-ghost btn-sm" onclick="openModal('bird',${s._id})">${IC.edit}</button>`
+        : `<button class="btn btn-ghost btn-sm" onclick="openModal('sale',${s._id})">${IC.edit}</button>`;
+    const delBtn = s._type==='manual'
+      ? `<button class="btn btn-danger btn-sm" onclick="deleteItem('sales',${s._id})">${IC.del}</button>`
+      : `<span style="font-size:10px;color:var(--muted);">Auto</span>`;
+    return `<tr>
+      <td><div style="font-weight:600;">${s.name}</div></td>
+      <td><span style="background:var(--surface2);color:${color};padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;">${s.mutation}</span></td>
+      <td style="color:var(--muted);">${fdate(s.date)}</td>
+      <td>${s.buyer}</td>
+      <td style="color:var(--amber);font-weight:700;">${pkr(s.price)}</td>
+      <td style="color:var(--muted);font-size:11px;">${s.notes||'—'}</td>
+      <td><div style="display:flex;gap:6px;align-items:center;">${editBtn}${delBtn}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderExpenses() {
+  const manualExp = db.expenses.map(e => ({
+    _type:'manual', _id:e.id,
+    category:e.category, description:e.description,
+    date:e.date, amount:Number(e.amount||0)
+  }));
+  const birdExp = db.birds.filter(b=>b.buyPrice&&Number(b.buyPrice)>0).map(b => ({
+    _type:'bird', _id:b.id,
+    category:'Bird Purchase',
+    description:b.name+(b.ringNumber?' ['+b.ringNumber+']':'')+' — '+(b.mutation||'Normal')+' ('+( b.gender||'?')+')',
+    date:b.dob||'', amount:Number(b.buyPrice||0)
+  }));
+
+  const allExp = [...birdExp,...manualExp].sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+  const totalExp = allExp.reduce((a,e)=>a+e.amount,0);
+  document.getElementById('total-expenses').textContent = pkr(totalExp);
+
+  const tbody = document.getElementById('expenses-list');
+  if(!allExp.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty">No expenses yet</td></tr>'; return; }
+
+  const catColors = {
+    'Bird Purchase':'var(--amber)', 'Seed Mix':'var(--green)',
+    'Supplements/Vitamins':'var(--blue)', 'Cage/Equipment':'#f9a8d4',
+    'Vet/Medicine':'var(--red)', 'Electricity':'#a78bfa', 'Other':'var(--muted)'
+  };
+
+  tbody.innerHTML = allExp.map(e => {
+    const isBird = e._type==='bird';
+    const catColor = catColors[e.category]||'var(--muted)';
+    const editBtn = isBird
+      ? `<button class="btn btn-ghost btn-sm" onclick="openModal('bird',${e._id})">${IC.edit}</button>`
+      : `<button class="btn btn-ghost btn-sm" onclick="openModal('expense',${e._id})">${IC.edit}</button>`;
+    const delBtn = isBird
+      ? `<span style="font-size:10px;color:var(--muted);">Auto</span>`
+      : `<button class="btn btn-danger btn-sm" onclick="deleteItem('expenses',${e._id})">${IC.del}</button>`;
+    return `<tr>
+      <td><span style="background:var(--surface2);color:${catColor};padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid var(--border2);">${e.category}</span></td>
+      <td style="font-size:12px;">${e.description}</td>
+      <td style="color:var(--muted);">${fdate(e.date)}</td>
+      <td style="color:var(--red);font-weight:700;">${pkr(e.amount)}</td>
+      <td><div style="display:flex;gap:6px;align-items:center;">${editBtn}${delBtn}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPL() {
+  const manualRev = db.sales.reduce((a,s)=>a+Number(s.price||0),0);
+  const eggRev = (db.eggs||[]).filter(e=>e.status==='Sold').reduce((a,e)=>a+Number(e.soldPrice||0),0);
+  const birdSaleRev = db.birds.filter(b=>(b.sold===true||b.sold==='true')&&b.soldPrice).reduce((a,b)=>a+Number(b.soldPrice||0),0);
+  const rev = manualRev + eggRev + birdSaleRev;
+
+  const manualExp = db.expenses.reduce((a,e)=>a+Number(e.amount||0),0);
+  const birdExp = db.birds.filter(b=>b.buyPrice&&Number(b.buyPrice)>0).reduce((a,b)=>a+Number(b.buyPrice||0),0);
+  const exp = manualExp + birdExp;
+  const profit = rev - exp;
+  const pct = exp > 0 ? Math.round((profit/exp)*100) : 0;
+
+  document.getElementById('pl-cards').innerHTML = `
+    <div class="pl-card profit">
+      <div class="pl-label" style="color:var(--green);">REVENUE</div>
+      <div class="pl-value" style="color:var(--green);">${pkr(rev)}</div>
+    </div>
+    <div class="pl-card loss-card">
+      <div class="pl-label" style="color:var(--red);">EXPENSES</div>
+      <div class="pl-value" style="color:var(--red);">${pkr(exp)}</div>
+    </div>
+    <div class="pl-card ${profit>=0?'profit':'loss-card'}">
+      <div class="pl-label" style="color:${profit>=0?'var(--green)':'var(--red)'};">${profit>=0?'NET PROFIT':'NET LOSS'}</div>
+      <div class="pl-value" style="color:${profit>=0?'var(--green)':'var(--red)'};">${pkr(Math.abs(profit))}</div>
+      <div style="font-size:11px;color:${profit>=0?'var(--green)':'var(--red)'};margin-top:6px;opacity:0.7;">${profit>=0?'+':''}${pct}% return</div>
+    </div>`;
+
+  const cats = {};
+  db.expenses.forEach(e => { cats[e.category]=(cats[e.category]||0)+Number(e.amount||0); });
+  if(birdExp>0) cats['Bird Purchase']=(cats['Bird Purchase']||0)+birdExp;
+  const catEl = document.getElementById('cat-breakdown');
+  if(!Object.keys(cats).length) { catEl.innerHTML='<p style="color:var(--muted);text-align:center;padding:16px;">No expenses</p>'; return; }
+  const total = Object.values(cats).reduce((a,b)=>a+b,0);
+  const catColors = {'Bird Purchase':'var(--amber)','Seed Mix':'var(--green)','Supplements/Vitamins':'var(--blue)','Cage/Equipment':'#f9a8d4','Vet/Medicine':'var(--red)','Electricity':'#a78bfa','Other':'var(--muted)'};
+  catEl.innerHTML = Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([cat,amt]) => {
+    const pct = total>0?Math.round((amt/total)*100):0;
+    const color = catColors[cat]||'var(--muted)';
+    return `<div class="cat-row">
+      <div style="display:flex;flex-direction:column;gap:4px;flex:1;margin-right:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:12px;font-weight:500;">${cat}</span>
+          <span style="color:var(--red);font-weight:700;font-size:13px;">${pkr(amt)}</span>
+        </div>
+        <div style="background:var(--border);border-radius:4px;height:3px;overflow:hidden;">
+          <div style="width:${pct}%;height:100%;background:${color};border-radius:4px;"></div>
+        </div>
+      </div>
+      <span style="font-size:11px;color:var(--muted);width:32px;text-align:right;">${pct}%</span>
+    </div>`;
+  }).join('');
+}
+
+// MODALS
+function openModal(type, id=null) {
+  editType = type;
+  editId = id;
+  let item = {};
+  if(id) {
+    if(type==='bird') item = db.birds.find(b=>b.id==id)||{};
+    if(type==='pair') item = db.pairs.find(p=>p.id==id)||{};
+    if(type==='clutch') item = db.clutches.find(c=>c.id==id)||{};
+    if(type==='sale') item = db.sales.find(s=>s.id==id)||{};
+    if(type==='expense') item = db.expenses.find(e=>e.id==id)||{};
+  }
+  const mc = document.getElementById('modal-content');
+  mc.innerHTML = buildForm(type, item);
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  editId = null; editType = null;
+}
+
+function buildForm(type, item) {
+  const v = (k,def='') => item[k]!==undefined ? item[k] : def;
+  const inp = (label,key,t='text',ph='') => `<div class="form-group"><label>${label}</label><input type="${t}" id="f-${key}" value="${v(key)}" placeholder="${ph}"></div>`;
+  const sel = (label,key,opts) => `<div class="form-group"><label>${label}</label><select id="f-${key}">${opts.map(o=>typeof o==='string'?`<option ${v(key)==o?'selected':''}>${o}</option>`:`<option value="${o.value}" ${v(key)==o.value?'selected':''}>${o.label}</option>`).join('')}</select></div>`;
+
+  const actions = `<div class="modal-actions"><button class="btn btn-green" onclick="saveForm()">Save</button><button class="btn btn-gray" onclick="closeModal()">Cancel</button></div>`;
+
+  if(type==='bird') {
+    const allMuts = ['',...(db.mutations||[])];
+    const isSold = v('sold') === 'true' || v('sold') === true;
+    const isChick = v('boughtAsChick') === true || v('boughtAsChick') === 'true';
+    const isExpired = v('expired') === true || v('expired') === 'true';
+
+    return `<h3>${editId ? 'Edit Bird' : 'Add Bird'}</h3>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="form-group" style="margin:0"><label>Bird Name *</label><input type="text" id="f-name" value="${v('name')}" placeholder="e.g. Raja"></div>
+      <div class="form-group" style="margin:0"><label>Ring Number</label><input type="text" id="f-ringNumber" value="${v('ringNumber')}" placeholder="e.g. PK-2024-001"></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+      <div class="form-group" style="margin:0"><label>Gender</label>
+        <select id="f-gender">
+          ${['','Male','Female'].map(o=>`<option ${v('gender')==o?'selected':''}>${o}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group" style="margin:0"><label>Mutation</label>
+        <div style="display:flex;gap:6px;">
+          <select id="f-mutation" style="flex:1;">${allMuts.map(m=>`<option ${v('mutation')==m?'selected':''}>${m}</option>`).join('')}</select>
+          <button type="button" onclick="openMutationManager()" style="background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:0 10px;color:var(--muted);cursor:pointer;font-size:11px;white-space:nowrap;">⚙️</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+      <div class="form-group" style="margin:0"><label>Breeder / Seller</label><input type="text" id="f-breederName" value="${v('breederName')}" placeholder="e.g. Ahmed Ali"></div>
+      <div class="form-group" style="margin:0"><label>Buy Price (PKR)</label><input type="number" id="f-buyPrice" value="${v('buyPrice','')}" placeholder="0"></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+      <div class="form-group" style="margin:0"><label>Date of Arrival</label><input type="date" id="f-dob" value="${v('dob')}"></div>
+      <div class="form-group" style="margin:0"><label>Notes</label><input type="text" id="f-notes" value="${v('notes')}" placeholder="Extra info..."></div>
+    </div>
+
+    <div style="height:1px;background:var(--border);margin:14px 0;"></div>
+
+    <!-- Chick toggle -->
+    <div style="background:${isChick?'#0c1a2e':'var(--surface2)'};border:1px solid ${isChick?'#1d4ed8':'var(--border2)'};border-radius:8px;padding:12px;margin-bottom:10px;">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+        <input type="checkbox" id="f-boughtAsChick" ${isChick?'checked':''} onchange="toggleChickFields()" style="width:16px;height:16px;accent-color:#60a5fa;">
+        <div>
+          <div style="font-weight:600;font-size:13px;">Track as Chick (age tracking)</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">When checked, age is counted from Date of Arrival</div>
+        </div>
+      </label>
+      <div id="bird-chick-section" style="margin-top:10px;display:${isChick?'block':'none'};">
+        <div style="background:var(--bg);border-radius:6px;padding:8px 12px;font-size:12px;color:var(--blue);">
+          Age is calculated automatically from Date of Arrival
+        </div>
+      </div>
+    </div>
+
+    <!-- Sold toggle -->
+    <div style="background:${isSold?'#052e16':'var(--surface2)'};border:1px solid ${isSold?'var(--green-border)':'var(--border2)'};border-radius:8px;padding:12px;margin-bottom:10px;">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+        <input type="checkbox" id="f-sold" ${isSold?'checked':''} onchange="toggleBirdSold()" style="width:16px;height:16px;accent-color:#34d399;">
+        <span style="font-weight:600;font-size:13px;">Mark as Sold</span>
+      </label>
+      <div id="bird-sold-section" style="margin-top:10px;display:${isSold?'block':'none'};">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="form-group" style="margin:0"><label>Sold Date</label><input type="date" id="f-soldDate" value="${v('soldDate')}"></div>
+          <div class="form-group" style="margin:0"><label>Sold Price (PKR)</label><input type="number" id="f-soldPrice" value="${v('soldPrice','')}" placeholder="0"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expired toggle -->
+    <div style="background:${isExpired?'var(--red-bg)':'var(--surface2)'};border:1px solid ${isExpired?'var(--red-border)':'var(--border2)'};border-radius:8px;padding:12px;">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+        <input type="checkbox" id="f-expired" ${isExpired?'checked':''} style="width:16px;height:16px;accent-color:#f87171;">
+        <span style="font-weight:600;font-size:13px;">Mark as Expired</span>
+      </label>
+    </div>
+
+    ${actions}`;
+  }
+
+  if(type==='pair') {
+    const males = db.birds.filter(b=>b.gender==='Male');
+    const females = db.birds.filter(b=>b.gender==='Female');
+    return `<h3>${editId?'Edit Pair':'Add Pair'}</h3>
+      <div class="form-group"><label>Male Bird *</label><select id="f-maleId"><option value="">-- Select Male --</option>${males.map(b=>`<option value="${b.id}" ${v('maleId')==b.id?'selected':''}>${b.name}${b.ringNumber?' ['+b.ringNumber+']':''} — ${b.mutation||'Normal'}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Female Bird *</label><select id="f-femaleId"><option value="">-- Select Female --</option>${females.map(b=>`<option value="${b.id}" ${v('femaleId')==b.id?'selected':''}>${b.name}${b.ringNumber?' ['+b.ringNumber+']':''} — ${b.mutation||'Normal'}</option>`).join('')}</select></div>
+      ${inp('Paired Date','pairedDate','date')}
+      ${inp('Cage Number','cage','text','e.g. Cage 3')}
+      ${actions}`;
+  }
+
+  if(type==='clutch') return `<h3>${editId?'Edit Clutch':'New Clutch'}</h3>
+    <div class="form-group"><label>Pair *</label><select id="f-pairId"><option value="">-- Select Pair --</option>${db.pairs.map(p=>`<option value="${p.id}" ${v('pairId')==p.id?'selected':''}>${getPairName(p.id)}</option>`).join('')}</select></div>
+    ${inp('Clutch Start Date','startDate','date')}
+    ${inp('Notes (optional)','notes','text','e.g. 2nd clutch of season')}
+    ${actions}`;
+
+  if(type==='sale') return `<h3>${editId?'Edit Sale':'Add Sale'}</h3>
+    ${inp('Bird/Item Name *','birdName','text','e.g. e.g. Pineapple Chick')}
+    ${inp('Mutation','mutation','text','e.g. Pineapple')}
+    ${inp('Sale Date *','date','date')}
+    ${inp('Buyer Name','buyer','text','Enter buyer name')}
+    ${inp('Sale Price (PKR) *','price','number','0')}
+    ${inp('Notes','notes','text','Extra info...')}
+    ${actions}`;
+
+  if(type==='expense') return `<h3>${editId?'Edit Expense':'Add Expense'}</h3>
+    ${sel('Category *','category',['','Bird Purchase','Seed Mix','Supplements/Vitamins','Cage/Equipment','Vet/Medicine','Electricity','Other'])}
+    ${inp('Description *','description','text','e.g. 20kg seed mix')}
+    ${inp('Date *','date','date')}
+    ${inp('Amount (PKR) *','amount','number','0')}
+    ${actions}`;
+}
+
+function getVal(id) { const el = document.getElementById('f-'+id); return el ? el.value : ''; }
+
+function saveForm() {
+  const t = editType;
+  let obj = {};
+
+  if(t==='bird') {
+    const soldEl = document.getElementById('f-sold');
+    const chickEl = document.getElementById('f-boughtAsChick');
+    const expiredEl = document.getElementById('f-expired');
+    obj = { name:getVal('name'), ringNumber:getVal('ringNumber'), gender:getVal('gender'), mutation:getVal('mutation'), breederName:getVal('breederName'), dob:getVal('dob'), buyPrice:getVal('buyPrice'), notes:getVal('notes'),
+      sold: soldEl ? soldEl.checked : false,
+      soldDate: getVal('soldDate'),
+      soldPrice: getVal('soldPrice'),
+      boughtAsChick: chickEl ? chickEl.checked : false,
+      expired: expiredEl ? expiredEl.checked : false,
+    };
+  }
+  if(t==='pair') obj = { maleId:getVal('maleId'), femaleId:getVal('femaleId'), pairedDate:getVal('pairedDate'), cage:getVal('cage') };
+  if(t==='clutch') obj = { pairId:getVal('pairId'), startDate:getVal('startDate'), notes:getVal('notes') };
+  if(t==='sale') obj = { birdName:getVal('birdName'), mutation:getVal('mutation'), date:getVal('date'), buyer:getVal('buyer'), price:getVal('price'), notes:getVal('notes') };
+  if(t==='expense') obj = { category:getVal('category'), description:getVal('description'), date:getVal('date'), amount:getVal('amount') };
+
+  const key = t==='bird'?'birds':t==='pair'?'pairs':t==='clutch'?'clutches':t==='sale'?'sales':'expenses';
+  if(editId) {
+    db[key] = db[key].map(i => i.id==editId ? {...i,...obj} : i);
+  } else {
+    db[key].push({...obj, id: Date.now()});
+  }
+  saveDB();
+  closeModal();
+  renderAll();
+}
+
+function deleteItem(type, id) {
+  if(!confirm('Delete karna chahte ho?')) return;
+  db[type] = db[type].filter(i => i.id != id);
+  saveDB();
+  renderAll();
+}
+
+// Close modal on overlay click
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if(e.target === this) closeModal();
+});
+
+
+// ── EGG FUNCTIONS ─────────────────────────────────────────────────────────
+function addEgg(clutchId) {
+  const eggs = db.eggs.filter(e => e.clutchId == clutchId);
+  const eggNum = eggs.length + 1;
+  openEggModalNew(clutchId, eggNum);
+}
+
+function openEggModalNew(clutchId, eggNum) {
+  editType = 'egg';
+  editId = null;
+  window._eggClutchId = clutchId;
+  window._eggNum = eggNum;
+  const mc = document.getElementById('modal-content');
+  mc.innerHTML = buildEggForm({clutchId, eggNum});
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function openEggModal(eggId) {
+  editType = 'egg';
+  editId = eggId;
+  const egg = db.eggs.find(e => e.id == eggId) || {};
+  const mc = document.getElementById('modal-content');
+  mc.innerHTML = buildEggForm(egg);
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function buildEggForm(egg) {
+  const v = (k, def='') => egg[k] !== undefined ? egg[k] : def;
+  const mutList = db.mutations || [];
+  const allMuts = ['',...(db.mutations||[])];
+  const st = v('status','Pending');
+
+  return `<h3>Egg #${v('eggNum','?')}</h3>
+    <div class="form-group"><label>&#128197; Egg Laid Date *</label><input type="date" id="ef-date" value="${v('date')}"></div>
+    <div class="form-group"><label>Status *</label>
+      <select id="ef-status" onchange="toggleEggFields()">
+        ${['Pending','Fertile','Hatched','Infertile','Died in Shell','Sold'].map(s=>`<option ${st===s?'selected':''}>${s}</option>`).join('')}
+      </select>
+    </div>
+    <div id="ef-hatch-section" style="display:${st==='Hatched'?'block':'none'}">
+      <div class="form-group"><label>&#129514; Chick Mutation</label>
+        <select id="ef-mutation">${allMuts.map(m=>`<option ${v('mutation')===m?'selected':''}>${m}</option>`).join('')}</select>
+      </div>
+      <div class="form-group"><label>&#128007; Hatch Date</label><input type="date" id="ef-hatchDate" value="${v('hatchDate')}"></div>
+    </div>
+    <div id="ef-sold-section" style="display:${st==='Sold'?'block':'none'}">
+      <div class="form-group"><label>&#128197; Sold Date</label><input type="date" id="ef-soldDate" value="${v('soldDate')}"></div>
+      <div class="form-group"><label>&#128176; Sale Price (PKR)</label><input type="number" id="ef-soldPrice" value="${v('soldPrice','')}" placeholder="0"></div>
+      <div class="form-group"><label>&#128100; Buyer Name</label><input type="text" id="ef-soldTo" value="${v('soldTo','')}" placeholder="Enter buyer name"></div>
+    </div>
+    <div class="form-group"><label>&#129379; Foster (optional)</label><input type="text" id="ef-fosterName" value="${v('fosterName','')}" placeholder="Foster bird name"></div>
+    <div class="modal-actions">
+      <button class="btn btn-green" onclick="saveEgg()">&#128190; Save</button>
+      <button class="btn btn-gray" onclick="closeModal()">Cancel</button>
+    </div>`;
+}
+
+function toggleEggFields() {
+  const st = document.getElementById('ef-status').value;
+  document.getElementById('ef-hatch-section').style.display = st==='Hatched' ? 'block' : 'none';
+  document.getElementById('ef-sold-section').style.display = st==='Sold' ? 'block' : 'none';
+}
+
+function saveEgg() {
+  if(!db.eggs) db.eggs = [];
+  const obj = {
+    clutchId: editId ? (db.eggs.find(e=>e.id==editId)||{}).clutchId : window._eggClutchId,
+    eggNum: editId ? (db.eggs.find(e=>e.id==editId)||{}).eggNum : window._eggNum,
+    date: document.getElementById('ef-date').value,
+    status: document.getElementById('ef-status').value,
+    fosterName: document.getElementById('ef-fosterName') ? document.getElementById('ef-fosterName').value : '',
+    mutation: document.getElementById('ef-mutation') ? document.getElementById('ef-mutation').value : '',
+    hatchDate: document.getElementById('ef-hatchDate') ? document.getElementById('ef-hatchDate').value : '',
+    soldDate: document.getElementById('ef-soldDate') ? document.getElementById('ef-soldDate').value : '',
+    soldPrice: document.getElementById('ef-soldPrice') ? document.getElementById('ef-soldPrice').value : '',
+    soldTo: document.getElementById('ef-soldTo') ? document.getElementById('ef-soldTo').value : '',
+  };
+  if(editId) {
+    db.eggs = db.eggs.map(e => e.id==editId ? {...e,...obj} : e);
+  } else {
+    db.eggs.push({...obj, id: Date.now()});
+  }
+  saveDB();
+  closeModal();
+  renderAll();
+}
+
+function deleteEgg(id) {
+  if(!confirm('Are you sure you want to delete this egg?')) return;
+  db.eggs = db.eggs.filter(e => e.id != id);
+  saveDB();
+  renderAll();
+}
+
+function toggleChickFields() {
+  const checked = document.getElementById('f-boughtAsChick').checked;
+  document.getElementById('bird-chick-section').style.display = checked ? 'block' : 'none';
+}
+
+function toggleBirdSold() {
+  const checked = document.getElementById('f-sold').checked;
+  document.getElementById('bird-sold-section').style.display = checked ? 'block' : 'none';
+}
+
+function openMutationManager() {
+  document.getElementById('modal-content').innerHTML = buildMutationManager();
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function buildMutationManager() {
+  const muts = db.mutations || [];
+  const rows = muts.length ? muts.map((m,i) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid #2d3748;">
+      <span style="font-size:13px;color:#e2e8f0;">${m}</span>
+      <button onclick="deleteAnyMut(${i})" style="background:#742a2a;border:none;border-radius:6px;padding:4px 14px;color:#fc8181;cursor:pointer;font-size:12px;font-weight:600;">Delete</button>
+    </div>`).join('')
+  : '<div style="padding:16px;color:#718096;text-align:center;">No mutations added</div>';
+
+  return `<h3>Mutations</h3>
+    <div style="background:#0f1117;border-radius:8px;margin-bottom:14px;max-height:300px;overflow-y:auto;">${rows}</div>
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="new-mut-input" placeholder="Add new mutation..." style="flex:1;background:#2d3748;border:1px solid #4a5568;border-radius:8px;padding:8px 12px;color:#e2e8f0;font-size:13px;">
+      <button onclick="saveNewMut()" class="btn btn-green" style="white-space:nowrap;">+ Add</button>
+    </div>
+    <div class="modal-actions" style="margin-top:14px;">
+      <button class="btn btn-gray" onclick="closeMutManager()">&#10003; Done</button>
+    </div>`;
+}
+
+function saveNewMut() {
+  const inp = document.getElementById('new-mut-input');
+  const val = inp ? inp.value.trim() : '';
+  if(!val) return;
+  if(!db.mutations) db.mutations = [];
+  if(db.mutations.map(m=>m.toLowerCase()).includes(val.toLowerCase())) {
+    alert('This mutation already exists!'); return;
+  }
+  db.mutations.push(val);
+  saveDB();
+  document.getElementById('modal-content').innerHTML = buildMutationManager();
+}
+
+function deleteAnyMut(index) {
+  if(!db.mutations) return;
+  const name = db.mutations[index];
+  if(!confirm('"' + name + '" Are you sure you want to delete?')) return;
+  db.mutations.splice(index, 1);
+  saveDB();
+  document.getElementById('modal-content').innerHTML = buildMutationManager();
+}
+
+function closeMutManager() {
+  closeModal();
+  openModal('bird', editId);
+}
+
+
+function openEggModalNew(clutchId, eggNum) {
+  editType = 'egg';
+  editId = null;
+  window._eggClutchId = clutchId;
+  window._eggNum = eggNum;
+  const mc = document.getElementById('modal-content');
+  mc.innerHTML = buildEggForm({clutchId, eggNum});
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function openEggModal(eggId) {
+  editType = 'egg';
+  editId = eggId;
+  const egg = db.eggs.find(e => e.id == eggId) || {};
+  const mc = document.getElementById('modal-content');
+  mc.innerHTML = buildEggForm(egg);
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function buildEggForm(egg) {
+  const v = (k, def='') => egg[k] !== undefined ? egg[k] : def;
+  const mutList = db.mutations || [];
+  const allMuts = ['',...(db.mutations||[])];
+  const st = v('status','Pending');
+
+  return `<h3>Egg #${v('eggNum','?')}</h3>
+    <div class="form-group"><label>&#128197; Egg Laid Date *</label><input type="date" id="ef-date" value="${v('date')}"></div>
+    <div class="form-group"><label>Status *</label>
+      <select id="ef-status" onchange="toggleEggFields()">
+        ${['Pending','Fertile','Hatched','Infertile','Died in Shell','Sold'].map(s=>`<option ${st===s?'selected':''}>${s}</option>`).join('')}
+      </select>
+    </div>
+    <div id="ef-hatch-section" style="display:${st==='Hatched'?'block':'none'}">
+      <div class="form-group"><label>&#129514; Chick Mutation</label>
+        <select id="ef-mutation">${allMuts.map(m=>`<option ${v('mutation')===m?'selected':''}>${m}</option>`).join('')}</select>
+      </div>
+      <div class="form-group"><label>&#128007; Hatch Date</label><input type="date" id="ef-hatchDate" value="${v('hatchDate')}"></div>
+    </div>
+    <div id="ef-sold-section" style="display:${st==='Sold'?'block':'none'}">
+      <div class="form-group"><label>&#128197; Sold Date</label><input type="date" id="ef-soldDate" value="${v('soldDate')}"></div>
+      <div class="form-group"><label>&#128176; Sale Price (PKR)</label><input type="number" id="ef-soldPrice" value="${v('soldPrice','')}" placeholder="0"></div>
+      <div class="form-group"><label>&#128100; Buyer Name</label><input type="text" id="ef-soldTo" value="${v('soldTo','')}" placeholder="Enter buyer name"></div>
+    </div>
+    <div class="form-group"><label>&#129379; Foster (optional)</label><input type="text" id="ef-fosterName" value="${v('fosterName','')}" placeholder="Foster bird name"></div>
+    <div class="modal-actions">
+      <button class="btn btn-green" onclick="saveEgg()">&#128190; Save</button>
+      <button class="btn btn-gray" onclick="closeModal()">Cancel</button>
+    </div>`;
+}
+
+function toggleEggFields() {
+  const st = document.getElementById('ef-status').value;
+  document.getElementById('ef-hatch-section').style.display = st==='Hatched' ? 'block' : 'none';
+  document.getElementById('ef-sold-section').style.display = st==='Sold' ? 'block' : 'none';
+}
+
+function saveEgg() {
+  if(!db.eggs) db.eggs = [];
+  const obj = {
+    clutchId: editId ? (db.eggs.find(e=>e.id==editId)||{}).clutchId : window._eggClutchId,
+    eggNum: editId ? (db.eggs.find(e=>e.id==editId)||{}).eggNum : window._eggNum,
+    date: document.getElementById('ef-date').value,
+    status: document.getElementById('ef-status').value,
+    fosterName: document.getElementById('ef-fosterName') ? document.getElementById('ef-fosterName').value : '',
+    mutation: document.getElementById('ef-mutation') ? document.getElementById('ef-mutation').value : '',
+    hatchDate: document.getElementById('ef-hatchDate') ? document.getElementById('ef-hatchDate').value : '',
+    soldDate: document.getElementById('ef-soldDate') ? document.getElementById('ef-soldDate').value : '',
+    soldPrice: document.getElementById('ef-soldPrice') ? document.getElementById('ef-soldPrice').value : '',
+    soldTo: document.getElementById('ef-soldTo') ? document.getElementById('ef-soldTo').value : '',
+  };
+  if(editId) {
+    db.eggs = db.eggs.map(e => e.id==editId ? {...e,...obj} : e);
+  } else {
+    db.eggs.push({...obj, id: Date.now()});
+  }
+  saveDB();
+  closeModal();
+  renderAll();
+}
+
+function deleteEgg(id) {
+  if(!confirm('Are you sure you want to delete this egg?')) return;
+  db.eggs = db.eggs.filter(e => e.id != id);
+  saveDB();
+  renderAll();
+}
+
+function toggleChickFields() {
+  const checked = document.getElementById('f-boughtAsChick').checked;
+  document.getElementById('bird-chick-section').style.display = checked ? 'block' : 'none';
+}
+
+function toggleBirdSold() {
+  const checked = document.getElementById('f-sold').checked;
+  document.getElementById('bird-sold-section').style.display = checked ? 'block' : 'none';
+}
+
+function openMutationManager() {
+  const mc = document.getElementById('modal-content');
+  mc.innerHTML = buildMutationManager();
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function buildMutationManager() {
+  if(!db.customMutations) db.customMutations = [];
+  const deleted = db.deletedDefaults || [];
+  const defaults = ['Normal','Pineapple','Turquoise','Cinnamon','Yellow-sided','Suncheek','Creamino','Lutino','Violet','Mint'].filter(d => !deleted.includes(d));
+  const fullList = [...defaults, ...(db.customMutations||[])];
+
+  const rows = fullList.map(m => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-bottom:1px solid #2d3748;">
+      <span style="font-size:13px;color:#e2e8f0;">${m}</span>
+      <button onclick="deleteAnyMut('${m}')" style="background:#742a2a;border:none;border-radius:6px;padding:4px 12px;color:#fc8181;cursor:pointer;font-size:12px;font-weight:600;">Delete</button>
+    </div>`).join('');
+
+  return `<h3>Mutations</h3>
+    <div style="background:#0f1117;border-radius:8px;margin-bottom:14px;max-height:300px;overflow-y:auto;">${rows || '<div style="padding:16px;color:#718096;text-align:center;">No mutations added</div>'}</div>
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="new-mut-input" placeholder="Add new mutation..." style="flex:1;background:#2d3748;border:1px solid #4a5568;border-radius:8px;padding:8px 12px;color:#e2e8f0;font-size:13px;">
+      <button onclick="saveNewMut()" class="btn btn-green" style="white-space:nowrap;">+ Add</button>
+    </div>
+    <div class="modal-actions" style="margin-top:14px;">
+      <button class="btn btn-gray" onclick="closeMutManager()">&#10003; Done</button>
+    </div>`;
+}
+
+function saveNewMut() {
+  const inp = document.getElementById('new-mut-input');
+  const val = inp ? inp.value.trim() : '';
+  if(!val) return;
+  if(!db.customMutations) db.customMutations = [];
+  if(db.customMutations.map(m=>m.toLowerCase()).includes(val.toLowerCase())) {
+    alert('This mutation already exists!'); return;
+  }
+  db.customMutations.push(val);
+  saveDB();
+  document.getElementById('modal-content').innerHTML = buildMutationManager();
+}
+
+function deleteAnyMut(name) {
+  if(!db.customMutations) db.customMutations = [];
+  const defaults = ['Normal','Pineapple','Turquoise','Cinnamon','Yellow-sided','Suncheek','Creamino','Lutino','Violet','Mint'];
+  // Agar default hai tou use customMutations mein add karo with a "deleted" marker — nahi
+  // Simply: agar default hai, remove it by adding it as "deleted default" tracking
+  // Easiest: just keep ALL mutations in customMutations, remove defaults on first load
+  if(!confirm('"' + name + '" Are you sure you want to delete?')) return;
+  // Remove from customMutations if there
+  db.customMutations = db.customMutations.filter(m => m !== name);
+  // If it was a default, add to deletedDefaults so it stays gone
+  if(!db.deletedDefaults) db.deletedDefaults = [];
+  if(defaults.includes(name) && !db.deletedDefaults.includes(name)) {
+    db.deletedDefaults.push(name);
+  }
+  saveDB();
+  document.getElementById('modal-content').innerHTML = buildMutationManager();
+}
+
+function closeMutManager() {
+  closeModal();
+  openModal('bird', editId);
+}
+
+
+function openEggModalNew(clutchId, eggNum) {
+  editType = 'egg';
+  editId = null;
+  window._eggClutchId = clutchId;
+  window._eggNum = eggNum;
+  const mc = document.getElementById('modal-content');
+  mc.innerHTML = buildEggForm({clutchId, eggNum});
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function openEggModal(eggId) {
+  editType = 'egg';
+  editId = eggId;
+  const egg = db.eggs.find(e => e.id == eggId) || {};
+  const mc = document.getElementById('modal-content');
+  mc.innerHTML = buildEggForm(egg);
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function buildEggForm(egg) {
+  const v = (k, def='') => egg[k] !== undefined ? egg[k] : def;
+  const mutList = db.mutations || [];
+  const allMuts = ['',...(db.mutations||[])];
+  const st = v('status','Pending');
+
+  return `<h3>Egg #${v('eggNum','?')}</h3>
+    <div class="form-group"><label>&#128197; Egg Laid Date *</label><input type="date" id="ef-date" value="${v('date')}"></div>
+    <div class="form-group"><label>Status *</label>
+      <select id="ef-status" onchange="toggleEggFields()">
+        ${['Pending','Fertile','Hatched','Infertile','Died in Shell','Sold'].map(s=>`<option ${st===s?'selected':''}>${s}</option>`).join('')}
+      </select>
+    </div>
+    <div id="ef-hatch-section" style="display:${st==='Hatched'?'block':'none'}">
+      <div class="form-group"><label>&#129514; Chick Mutation</label>
+        <select id="ef-mutation">${allMuts.map(m=>`<option ${v('mutation')===m?'selected':''}>${m}</option>`).join('')}</select>
+      </div>
+      <div class="form-group"><label>&#128007; Hatch Date</label><input type="date" id="ef-hatchDate" value="${v('hatchDate')}"></div>
+    </div>
+    <div id="ef-sold-section" style="display:${st==='Sold'?'block':'none'}">
+      <div class="form-group"><label>&#128197; Sold Date</label><input type="date" id="ef-soldDate" value="${v('soldDate')}"></div>
+      <div class="form-group"><label>&#128176; Sale Price (PKR)</label><input type="number" id="ef-soldPrice" value="${v('soldPrice','')}" placeholder="0"></div>
+      <div class="form-group"><label>&#128100; Buyer Name</label><input type="text" id="ef-soldTo" value="${v('soldTo','')}" placeholder="Enter buyer name"></div>
+    </div>
+    <div class="form-group"><label>&#129379; Foster (optional)</label><input type="text" id="ef-fosterName" value="${v('fosterName','')}" placeholder="Foster bird name"></div>
+    <div class="modal-actions">
+      <button class="btn btn-green" onclick="saveEgg()">&#128190; Save</button>
+      <button class="btn btn-gray" onclick="closeModal()">Cancel</button>
+    </div>`;
+}
+
+function toggleEggFields() {
+  const st = document.getElementById('ef-status').value;
+  document.getElementById('ef-hatch-section').style.display = st==='Hatched' ? 'block' : 'none';
+  document.getElementById('ef-sold-section').style.display = st==='Sold' ? 'block' : 'none';
+}
+
+function saveEgg() {
+  if(!db.eggs) db.eggs = [];
+  const obj = {
+    clutchId: editId ? (db.eggs.find(e=>e.id==editId)||{}).clutchId : window._eggClutchId,
+    eggNum: editId ? (db.eggs.find(e=>e.id==editId)||{}).eggNum : window._eggNum,
+    date: document.getElementById('ef-date').value,
+    status: document.getElementById('ef-status').value,
+    fosterName: document.getElementById('ef-fosterName') ? document.getElementById('ef-fosterName').value : '',
+    mutation: document.getElementById('ef-mutation') ? document.getElementById('ef-mutation').value : '',
+    hatchDate: document.getElementById('ef-hatchDate') ? document.getElementById('ef-hatchDate').value : '',
+    soldDate: document.getElementById('ef-soldDate') ? document.getElementById('ef-soldDate').value : '',
+    soldPrice: document.getElementById('ef-soldPrice') ? document.getElementById('ef-soldPrice').value : '',
+    soldTo: document.getElementById('ef-soldTo') ? document.getElementById('ef-soldTo').value : '',
+  };
+  if(editId) {
+    db.eggs = db.eggs.map(e => e.id==editId ? {...e,...obj} : e);
+  } else {
+    db.eggs.push({...obj, id: Date.now()});
+  }
+  saveDB();
+  closeModal();
+  renderAll();
+}
+
+function deleteEgg(id) {
+  if(!confirm('Are you sure you want to delete this egg?')) return;
+  db.eggs = db.eggs.filter(e => e.id != id);
+  saveDB();
+  renderAll();
+}
+
+function toggleChickFields() {
+  const checked = document.getElementById('f-boughtAsChick').checked;
+  document.getElementById('bird-chick-section').style.display = checked ? 'block' : 'none';
+}
+
+function toggleBirdSold() {
+  const checked = document.getElementById('f-sold').checked;
+  document.getElementById('bird-sold-section').style.display = checked ? 'block' : 'none';
+}
+
+function openMutationManager() {
+  const mc = document.getElementById('modal-content');
+  mc.innerHTML = buildMutationManager();
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function buildMutationManager() {
+  const custom = db.customMutations || [];
+  const defaults = ['Normal','Pineapple','Turquoise','Cinnamon','Yellow-sided','Suncheek','Creamino','Lutino','Violet','Mint'];
+  const rows = [
+    ...defaults.map(m => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid #2d3748;">
+      <span style="font-size:13px;">${m}</span>
+      <span style="font-size:10px;color:#718096;">Default</span>
+    </div>`),
+    ...custom.map(m => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid #2d3748;">
+      <span style="font-size:13px;">${m}</span>
+      <button onclick="deleteCustomMut('${m}')" style="background:#742a2a;border:none;border-radius:6px;padding:3px 10px;color:#fc8181;cursor:pointer;font-size:12px;">&#128465;&#65039; Delete</button>
+    </div>`)
+  ].join('');
+  return `<h3>&#129514; Mutations Manage Karo</h3>
+    <div style="background:#0f1117;border-radius:8px;margin-bottom:14px;max-height:280px;overflow-y:auto;">${rows}</div>
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="new-mut-input" placeholder="Add new mutation" style="flex:1;background:#2d3748;border:1px solid #4a5568;border-radius:8px;padding:8px 12px;color:#e2e8f0;font-size:13px;">
+      <button onclick="saveNewMut()" class="btn btn-green">+ Add</button>
+    </div>
+    <div class="modal-actions" style="margin-top:14px;">
+      <button class="btn btn-gray" onclick="closeMutManager()">&#10003; Done</button>
+    </div>`;
+}
+
+function saveNewMut() {
+  const inp = document.getElementById('new-mut-input');
+  const val = inp ? inp.value.trim() : '';
+  if(!val) return;
+  if(!db.customMutations) db.customMutations = [];
+  const all = ['Normal','Pineapple','Turquoise','Cinnamon','Yellow-sided','Suncheek','Creamino','Lutino','Violet','Mint',...db.customMutations];
+  if(all.map(m=>m.toLowerCase()).includes(val.toLowerCase())) { alert('This mutation already exists!'); return; }
+  db.customMutations.push(val);
+  saveDB();
+  document.getElementById('modal-content').innerHTML = buildMutationManager();
+}
+
+function deleteCustomMut(name) {
+  if(!confirm('"' + name + '" Are you sure you want to delete?')) return;
+  db.customMutations = (db.customMutations||[]).filter(m => m !== name);
+  saveDB();
+  document.getElementById('modal-content').innerHTML = buildMutationManager();
+}
+
+function closeMutManager() {
+  closeModal();
+  openModal('bird', editId);
+}
+
+
+function openEggModalNew(clutchId, eggNum) {
+  editType = 'egg';
+  editId = null;
+  window._eggClutchId = clutchId;
+  window._eggNum = eggNum;
+  const mc = document.getElementById('modal-content');
+  mc.innerHTML = buildEggForm({clutchId, eggNum});
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function openEggModal(eggId) {
+  editType = 'egg';
+  editId = eggId;
+  const egg = db.eggs.find(e => e.id == eggId) || {};
+  const mc = document.getElementById('modal-content');
+  mc.innerHTML = buildEggForm(egg);
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function buildEggForm(egg) {
+  const v = (k, def='') => egg[k] !== undefined ? egg[k] : def;
+  const mutList = db.mutations || [];
+  const allMuts = ['',...(db.mutations||[])];
+  const st = v('status','Pending');
+
+  return `<h3>Egg #${v('eggNum','?')}</h3>
+    <div class="form-group"><label>&#128197; Egg Laid Date *</label><input type="date" id="ef-date" value="${v('date')}"></div>
+    <div class="form-group"><label>Status *</label>
+      <select id="ef-status" onchange="toggleEggFields()">
+        ${['Pending','Fertile','Hatched','Infertile','Died in Shell','Sold'].map(s=>`<option ${st===s?'selected':''}>${s}</option>`).join('')}
+      </select>
+    </div>
+    <div id="ef-hatch-section" style="display:${st==='Hatched'?'block':'none'}">
+      <div class="form-group"><label>&#129514; Chick Mutation</label>
+        <select id="ef-mutation">${allMuts.map(m=>`<option ${v('mutation')===m?'selected':''}>${m}</option>`).join('')}</select>
+      </div>
+      <div class="form-group"><label>&#128007; Hatch Date</label><input type="date" id="ef-hatchDate" value="${v('hatchDate')}"></div>
+    </div>
+    <div id="ef-sold-section" style="display:${st==='Sold'?'block':'none'}">
+      <div class="form-group"><label>&#128197; Sold Date</label><input type="date" id="ef-soldDate" value="${v('soldDate')}"></div>
+      <div class="form-group"><label>&#128176; Sale Price (PKR)</label><input type="number" id="ef-soldPrice" value="${v('soldPrice','')}" placeholder="0"></div>
+      <div class="form-group"><label>&#128100; Buyer Name</label><input type="text" id="ef-soldTo" value="${v('soldTo','')}" placeholder="Enter buyer name"></div>
+    </div>
+    <div class="form-group"><label>&#129379; Foster (optional)</label><input type="text" id="ef-fosterName" value="${v('fosterName','')}" placeholder="Foster bird name"></div>
+    <div class="modal-actions">
+      <button class="btn btn-green" onclick="saveEgg()">&#128190; Save</button>
+      <button class="btn btn-gray" onclick="closeModal()">Cancel</button>
+    </div>`;
+}
+
+function toggleEggFields() {
+  const st = document.getElementById('ef-status').value;
+  document.getElementById('ef-hatch-section').style.display = st==='Hatched' ? 'block' : 'none';
+  document.getElementById('ef-sold-section').style.display = st==='Sold' ? 'block' : 'none';
+}
+
+function saveEgg() {
+  if(!db.eggs) db.eggs = [];
+  const obj = {
+    clutchId: editId ? (db.eggs.find(e=>e.id==editId)||{}).clutchId : window._eggClutchId,
+    eggNum: editId ? (db.eggs.find(e=>e.id==editId)||{}).eggNum : window._eggNum,
+    date: document.getElementById('ef-date').value,
+    status: document.getElementById('ef-status').value,
+    fosterName: document.getElementById('ef-fosterName') ? document.getElementById('ef-fosterName').value : '',
+    mutation: document.getElementById('ef-mutation') ? document.getElementById('ef-mutation').value : '',
+    hatchDate: document.getElementById('ef-hatchDate') ? document.getElementById('ef-hatchDate').value : '',
+    soldDate: document.getElementById('ef-soldDate') ? document.getElementById('ef-soldDate').value : '',
+    soldPrice: document.getElementById('ef-soldPrice') ? document.getElementById('ef-soldPrice').value : '',
+    soldTo: document.getElementById('ef-soldTo') ? document.getElementById('ef-soldTo').value : '',
+  };
+  if(editId) {
+    db.eggs = db.eggs.map(e => e.id==editId ? {...e,...obj} : e);
+  } else {
+    db.eggs.push({...obj, id: Date.now()});
+  }
+  saveDB();
+  closeModal();
+  renderAll();
+}
+
+function deleteEgg(id) {
+  if(!confirm('Are you sure you want to delete this egg?')) return;
+  db.eggs = db.eggs.filter(e => e.id != id);
+  saveDB();
+  renderAll();
+}
+
+function toggleChickFields() {
+  const checked = document.getElementById('f-boughtAsChick').checked;
+  document.getElementById('bird-chick-section').style.display = checked ? 'block' : 'none';
+}
+
+function toggleBirdSold() {
+  const checked = document.getElementById('f-sold').checked;
+  document.getElementById('bird-sold-section').style.display = checked ? 'block' : 'none';
+}
+
+function deleteMutation() {
+  const sel = document.getElementById('manage-mut-select');
+  if(!sel) return;
+  const name = sel.value;
+  const custom = db.customMutations || [];
+  if(!custom.includes(name)) { alert('"' + name + '" is a default mutation and cannot be deleted!'); return; }
+  if(!confirm('"' + name + '" Are you sure you want to delete?')) return;
+  db.customMutations = custom.filter(m => m !== name);
+  saveDB();
+  openModal('bird', editId);
+}
+
+function editMutation() {
+  const sel = document.getElementById('manage-mut-select');
+  if(!sel) return;
+  const oldName = sel.value;
+  const custom = db.customMutations || [];
+  if(!custom.includes(oldName)) { alert('"' + oldName + '" is a default mutation and cannot be edited!'); return; }
+  const newName = prompt('Naya naam likho:', oldName);
+  if(!newName || newName.trim() === oldName) return;
+  db.customMutations = custom.map(m => m === oldName ? newName.trim() : m);
+  // Update any birds using old mutation name
+  db.birds = db.birds.map(b => b.mutation === oldName ? {...b, mutation: newName.trim()} : b);
+  saveDB();
+  openModal('bird', editId);
+}
+
+function addCustomMutation() {
+  const input = document.getElementById('new-mutation-input');
+  if(!input) return;
+  const val = input.value.trim();
+  if(!val) { alert('Mutation name likhen pehle!'); return; }
+  if(!db.mutations) db.mutations = [];
+  if(db.mutations.map(m=>m.toLowerCase()).includes(val.toLowerCase())) { alert('This mutation already exists!'); return; }
+  db.mutations.push(val);
+  saveDB();
+  const sel = document.getElementById('f-mutation');
+  const opt = document.createElement('option');
+  opt.value = val; opt.text = val; opt.selected = true;
+  sel.appendChild(opt);
+  input.value = '';
+  alert('"' + val + '" has been added!');
+}
+
+renderAll();
+</script>
+
+
+
+<script>
+// ── SERVICE WORKER ────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE_NAME = 'aviary-v1';
+    self.addEventListener('install', e => { self.skipWaiting(); });
+    self.addEventListener('activate', e => { e.waitUntil(clients.claim()); });
+    self.addEventListener('fetch', e => {
+      if (e.request.method !== 'GET') return;
+      e.respondWith(
+        caches.open(CACHE_NAME).then(cache =>
+          cache.match(e.request).then(cached => {
+            const fresh = fetch(e.request).then(res => {
+              cache.put(e.request, res.clone());
+              return res;
+            }).catch(() => cached);
+            return cached || fresh;
+          })
+        )
+      );
+    });
+  `;
+  const swBlob = new Blob([swCode], {type: 'application/javascript'});
+  const swURL  = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swURL).catch(() => {});
+}
+
+// ── INSTALL PROMPT ────────────────────────────────────────────────────────
+let _installPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _installPrompt = e;
+  const btn = document.getElementById('pwa-install-btn');
+  if (btn) btn.style.display = 'inline-flex';
+});
+
+window.addEventListener('appinstalled', () => {
+  _installPrompt = null;
+  const btn = document.getElementById('pwa-install-btn');
+  if (btn) btn.style.display = 'none';
+});
+
+function installPWA() {
+  if (_installPrompt) {
+    _installPrompt.prompt();
+    _installPrompt.userChoice.then(() => {
+      _installPrompt = null;
+      const btn = document.getElementById('pwa-install-btn');
+      if (btn) btn.style.display = 'none';
+    });
+  } else {
+    showInstallGuide();
+  }
+}
+
+function showInstallGuide() {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isAndroid = /android/i.test(navigator.userAgent);
+  let msg = '';
+  if (isIOS) {
+    msg = '<div style="font-size:14px;line-height:1.8;">'
+      + '<div style="font-size:22px;margin-bottom:12px;">📱 Install on iPhone</div>'
+      + '<div>1. Open this file in <strong>Safari</strong></div>'
+      + '<div>2. Tap the <strong>Share</strong> button (box with arrow ↑)</div>'
+      + '<div>3. Scroll down → tap <strong>"Add to Home Screen"</strong></div>'
+      + '<div>4. Tap <strong>Add</strong> — done! ✅</div>'
+      + '</div>';
+  } else if (isAndroid) {
+    msg = '<div style="font-size:14px;line-height:1.8;">'
+      + '<div style="font-size:22px;margin-bottom:12px;">📱 Install on Android</div>'
+      + '<div>1. Open this file in <strong>Chrome</strong></div>'
+      + '<div>2. Tap <strong>3 dots menu (⋮)</strong> top right</div>'
+      + '<div>3. Tap <strong>"Add to Home Screen"</strong></div>'
+      + '<div>4. Tap <strong>Add</strong> — done! ✅</div>'
+      + '<div style="margin-top:12px;padding:10px;background:var(--surface2);border-radius:8px;font-size:12px;color:var(--muted);">💡 Tip: If option not visible, the file must be opened directly in Chrome browser</div>'
+      + '</div>';
+  } else {
+    msg = '<div style="font-size:14px;line-height:1.8;">'
+      + '<div style="font-size:22px;margin-bottom:12px;">💻 Install on Desktop</div>'
+      + '<div>1. Open in <strong>Chrome</strong></div>'
+      + '<div>2. Click the <strong>install icon (⊕)</strong> in address bar</div>'
+      + '<div>3. Click <strong>Install</strong> — done! ✅</div>'
+      + '</div>';
+  }
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:#00000099;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  overlay.innerHTML = '<div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:24px;max-width:360px;width:100%;">'
+    + msg
+    + '<button onclick="this.parentElement.parentElement.remove()" style="margin-top:16px;width:100%;padding:10px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:8px;color:var(--green);font-weight:700;font-size:13px;cursor:pointer;font-family:Inter,sans-serif;">Got it!</button>'
+    + '</div>';
+  document.body.appendChild(overlay);
+}
+</script>
+</body>
+</html>
